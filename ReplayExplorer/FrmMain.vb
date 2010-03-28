@@ -3,59 +3,38 @@ Imports Strilbrary.Time
 Imports Strilbrary.Values
 Imports Strilbrary.Threading
 Imports Strilbrary.Collections
+Imports Strilbrary.Streams
+Imports Tinker.WC3
 Imports Tinker.WC3.Replay
+Imports Tinker.Pickling
 
 Public Class FrmMain
     Private _loadedReplay As ReplayReader
+    Private _headerReplay As ReplayReader
     Private _currentWorkId As ModByte
-    Private _ignoreEvents As Boolean
 
     Private Sub OnFormLoad() Handles Me.Load
         Me.Text = Application.ProductName
-        For Each e In (From v In EnumValues(Of WC3.Protocol.GameActionId)() Order By v.ToString)
-            lscActionTypes.Items.Add(e, isChecked:=True)
-        Next e
-        For Each e In (From v In EnumValues(Of ReplayEntryId)() Order By v.ToString)
-            lscEntryTypeFilter.Items.Add(e, isChecked:=e <> ReplayEntryId.GameStateChecksum)
-        Next e
     End Sub
 
     Private Sub OnClickMenuFileOpen(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles mnuOpen.Click
         Try
-            replayOpenFileDialog.Filter = "Warcraft 3 Replays (*.w3g)|*.w3g"
             If replayOpenFileDialog.ShowDialog() <> DialogResult.OK Then Return
             _loadedReplay = ReplayReader.FromFile(replayOpenFileDialog.FileName)
+            _headerReplay = _loadedReplay
+            lblReplayVersion.Text = "Replay Version: {0}".Frmt(_headerReplay.ReplayVersion)
+            lblTargetMap.Text = DirectCast(_loadedReplay.Entries.First.Payload.Value, NamedValueMap).ItemAs(Of GameStats)("game stats").AdvertisedPath
 
-            'Populate player list
-            _ignoreEvents = True
-            lscFilterPlayers.Items.Clear()
+            filterReplayControl.LoadReplay(_loadedReplay)
             Me.Text = Application.ProductName + ": " + IO.Path.GetFileName(replayOpenFileDialog.FileName)
-            For Each entry In _loadedReplay.Entries
-                Dim name As InvariantString
-                Dim pid As WC3.PlayerId
-                Select Case entry.Id
-                    Case ReplayEntryId.PlayerJoined
-                        Dim vals = DirectCast(entry.Payload.Value, NamedValueMap)
-                        name = vals.ItemAs(Of String)("name")
-                        pid = vals.ItemAs(Of WC3.PlayerId)("joiner id")
-                    Case ReplayEntryId.StartOfReplay
-                        Dim vals = DirectCast(entry.Payload.Value, NamedValueMap)
-                        name = vals.ItemAs(Of String)("primary player name")
-                        pid = vals.ItemAs(Of WC3.PlayerId)("primary player id")
-                    Case Else
-                        Exit For
-                End Select
-                If lscFilterPlayers.Items.Count > 12 Then Throw New IO.InvalidDataException("Replay has too many player entries.")
-                lscFilterPlayers.Items.Add("{0}: {1}".Frmt(pid.Index, name), True)
-            Next entry
 
+            btnChangeTargetMap.Enabled = True
+            btnImportReplayVersion.Enabled = True
             RefreshReplayView()
         Catch ex As Exception When TypeOf ex Is IO.IOException OrElse
                                    TypeOf ex Is IO.InvalidDataException
             MessageBox.Show("Error loading replay: {0}".Frmt(ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             _loadedReplay = Nothing
-        Finally
-            _ignoreEvents = False
         End Try
     End Sub
 
@@ -74,55 +53,21 @@ Public Class FrmMain
     Private Sub RefreshReplayView()
         If _loadedReplay Is Nothing Then Return
         _currentWorkId += CByte(1)
+        mnuSaveAs.Enabled = False
 
+        Dim replay = _loadedReplay
+        Dim workId = _currentWorkId
+        Dim filter = If(filterReplayControl.Visible,
+                        filterReplayControl.Filter(),
+                        Function(time, entry) True)
         dataReplay.Rows.Clear()
-
-        Dim startTime = TryParseGameTime(txtMinGameTime.Text)
-        Dim endTime = TryParseGameTime(txtMaxGameTime.Text)
-        Dim timeFilter = Function(time As UInt32, entry As ReplayEntry)
-                             If startTime IsNot Nothing AndAlso time < startTime Then Return False
-                             If endTime IsNot Nothing AndAlso time > endTime Then Return False
-                             Return True
-                         End Function
-
-        Dim playerPids = (From item In lscFilterPlayers.CheckedItems Select Byte.Parse(item.ToString.Split(":"c)(0))).ToArray
-        Dim playerFilter = Function(time As UInt32, entry As ReplayEntry)
-                               If entry.Id <> ReplayEntryId.Tick Then Return True
-                               Dim vals = DirectCast(entry.Payload.Value, NamedValueMap)
-                               Dim actions = vals.ItemAs(Of IReadableList(Of Tinker.WC3.Protocol.PlayerActionSet))("player action sets")
-                               If actions.Count <= 0 Then Return True
-                               Return (From action In actions Where playerPids.Contains(action.Id.Index)).Any
-                           End Function
-
-        Dim entryTypes = (From item In lscEntryTypeFilter.CheckedItems Select CType(item, ReplayEntryId)).ToArray
-        Dim entryFilter = Function(time As UInt32, entry As ReplayEntry)
-                              Return entryTypes.Contains(entry.Id)
-                          End Function
-
-        Dim showEmptyActions = Not chkIgnoreEmptyTicks.Checked
-        Dim actionTypes = (From item In lscActionTypes.CheckedItems Select CType(item, WC3.Protocol.GameActionId)).ToArray
-        Dim actionFilter = Function(time As UInt32, entry As ReplayEntry)
-                               If entry.Id <> ReplayEntryId.Tick Then Return True
-                               Dim vals = DirectCast(entry.Payload.Value, NamedValueMap)
-                               Dim actions = vals.ItemAs(Of IReadableList(Of Tinker.WC3.Protocol.PlayerActionSet))("player action sets")
-                               If actions.Count <= 0 Then Return showEmptyActions
-                               Return (From actionSet In actions
-                                       From action In actionSet.Actions
-                                       Where actionTypes.Contains(action.Id)).Any
-                           End Function
-
-        ThreadedAction(Sub() AsyncGenerateReplayView(_loadedReplay,
-                                                     _currentWorkId,
-                                                     Function(e1, e2) playerFilter(e1, e2) AndAlso
-                                                                      entryFilter(e1, e2) AndAlso
-                                                                      timeFilter(e1, e2) AndAlso
-                                                                      actionFilter(e1, e2)))
+        ThreadedAction(Sub() AsyncGenerateReplayView(replay, workId, filter))
     End Sub
 
     Private Sub AppendRows(ByVal workId As ModByte,
                            ByVal queue As SingleConsumerLockFreeQueue(Of DataGridViewRow),
                            ByVal parseProgress As UInteger,
-                           ByVal maxProgress As UInteger,
+                           ByVal maxParseProgress As UInteger,
                            ByVal lastCall As Boolean)
         If workId <> _currentWorkId Then Return 'another operation was started
         Dim t = Environment.TickCount
@@ -132,16 +77,17 @@ Public Class FrmMain
 
         lblProgress.Visible = True
         pbrLoadingReplay.Visible = True
-        pbrLoadingReplay.Maximum = CInt(maxProgress \ 2)
-        pbrLoadingReplay.Value = CInt(Math.Min(maxProgress, parseProgress) \ 2)
+        pbrLoadingReplay.Maximum = CInt(maxParseProgress \ 2)
+        pbrLoadingReplay.Value = CInt(Math.Min(maxParseProgress, parseProgress) \ 2)
 
         If lastCall Then
             If Not queue.WasEmpty Then
                 Call New SystemClock().AsyncWait(100.Milliseconds).ContinueWithAction(
-                    Sub() Me.BeginInvoke(Sub() AppendRows(workId, queue, parseProgress, maxProgress, lastCall)))
+                    Sub() Me.BeginInvoke(Sub() AppendRows(workId, queue, parseProgress, maxParseProgress, lastCall)))
             Else
                 lblProgress.Visible = False
                 pbrLoadingReplay.Visible = False
+                mnuSaveAs.Enabled = mnuModeEditReplay.Checked
             End If
         End If
     End Sub
@@ -157,6 +103,7 @@ Public Class FrmMain
 
         queue.BeginEnqueue(MakeGridViewRow("Replay Header", "-", replayReader.Description.Value))
         Try
+            Dim checkTimeout = 0
             For Each entry In replayReader.Entries
                 If workId <> _currentWorkId Then Return 'another operation was started
                 If entry.Id = ReplayEntryId.Tick Then
@@ -165,9 +112,20 @@ Public Class FrmMain
                 End If
 
                 If filter(gameTime, entry) Then
-                    queue.BeginEnqueue(MakeGridViewRow(entry.Id, gameTime, entry.Payload))
+                    queue.BeginEnqueue(MakeGridViewRow(entry.Id, gameTime, entry))
+                    throttle.SetActionToRun(processQueue)
+
+                    'Allow processor to keep up
+                    checkTimeout += 1
+                    If checkTimeout >= 256 Then
+                        checkTimeout = 0
+                        While queue.Count >= 256
+                            If workId <> _currentWorkId Then Return 'another operation was started
+                            throttle.SetActionToRun(processQueue)
+                            Threading.Thread.Sleep(10)
+                        End While
+                    End If
                 End If
-                throttle.SetActionToRun(processQueue)
             Next entry
 
             'Append finished
@@ -188,41 +146,122 @@ Public Class FrmMain
     End Function
 
     Private Sub OnGridSelectionChanged() Handles dataReplay.SelectionChanged
-        txtDesc.Text = (From cell In dataReplay.SelectedCells
-                        Distinct Select row = CType(cell, DataGridViewCell).OwningRow
-                        Select CType(row, DataGridViewRow).Cells(2).Value).StringJoin(Environment.NewLine)
+        Dim cells = From cell In dataReplay.SelectedCells Select DirectCast(cell, DataGridViewCell)
+        Dim rows = From cell In cells
+                   Select row = DirectCast(cell.OwningRow, DataGridViewRow)
+                   Distinct
+                   Order By row.Index
+
+        txtDesc.Text = (From row In rows
+                        Select row.Cells(2).Value
+                        ).StringJoin(Environment.NewLine)
+        btnEditSelectedEntry.Enabled = rows.CountUpTo(2) = 1 AndAlso
+                                       TypeOf rows.Single.Cells(0).Value Is ReplayEntryId
     End Sub
 
-    Private Sub OnFilterChange() Handles txtMinGameTime.TextChanged,
-                                         txtMaxGameTime.TextChanged,
-                                         chkIgnoreEmptyTicks.CheckedChanged,
-                                         lscEntryTypeFilter.ItemCheck,
-                                         lscFilterPlayers.ItemCheck,
-                                         lscActionTypes.ItemCheck
-        If _ignoreEvents OrElse _loadedReplay Is Nothing Then Return
+    Private Sub OnFilterChange() Handles filterReplayControl.FilterChanged
+        If _loadedReplay Is Nothing Then Return
         Me.BeginInvoke(Sub() RefreshReplayView())
     End Sub
 
-    Private Sub OnClickAllActionTypes() Handles btnAllActionTypes.Click
+    Private Sub OnClickEditEntry() Handles btnEditSelectedEntry.Click
+        Dim cell = Me.dataReplay.SelectedCells(0)
+        Dim row = Me.dataReplay.Rows(cell.RowIndex)
+        Dim jar = New ReplayEntryJar()
+        Dim pickle = jar.Pack(DirectCast(row.Cells(2).Value, ReplayEntry))
+        Dim result = FrmEditEntry.EditEntry(Me, jar, pickle)
+        If result IsNot Nothing Then
+            Dim entry = DirectCast(result.Value, ReplayEntry)
+            row.Cells(0).Value = entry.Id
+            row.Cells(2).Value = entry
+        End If
+        OnGridSelectionChanged()
+    End Sub
+
+    Private Sub OnClickImportReplayVersion() Handles btnImportReplayVersion.Click
+        If replayOpenFileDialog.ShowDialog() <> DialogResult.OK Then Return
         Try
-            _ignoreEvents = True
-            For i = 0 To lscActionTypes.Items.Count - 1
-                lscActionTypes.SetItemChecked(i, True)
-            Next i
-            RefreshReplayView()
-        Finally
-            _ignoreEvents = False
+            _headerReplay = ReplayReader.FromFile(replayOpenFileDialog.FileName)
+            dataReplay(2, 0).Value = _headerReplay.Description.Value
+            lblReplayVersion.Text = "Replay Version: {0}".Frmt(_headerReplay.ReplayVersion)
+            OnGridSelectionChanged()
+        Catch ex As Exception When TypeOf ex Is IO.IOException OrElse
+                                   TypeOf ex Is IO.InvalidDataException
+            MessageBox.Show("Error loading replay header: {0}".Frmt(ex))
         End Try
     End Sub
-    Private Sub OnClickNoActionTypes() Handles btnNoActionTypes.Click
+
+    Private Sub OnClickChangeTargetMap() Handles btnChangeTargetMap.Click
+        If mapOpenFileDialog.ShowDialog() <> DialogResult.OK Then Return
         Try
-            _ignoreEvents = True
-            For i = 0 To lscActionTypes.Items.Count - 1
-                lscActionTypes.SetItemChecked(i, False)
-            Next i
-            RefreshReplayView()
-        Finally
-            _ignoreEvents = False
+            Dim curFolder = IO.Directory.GetParent(mapOpenFileDialog.FileName)
+            Do
+                If curFolder.Parent Is Nothing Then
+                    Throw New InvalidOperationException("The selected file must be in a warcraft 3 maps folder.")
+                ElseIf curFolder.Parent.GetFiles("War3Patch.mpq").Any() Then
+                    Exit Do
+                Else
+                    curFolder = curFolder.Parent
+                End If
+            Loop
+
+            lblTargetMap.Text = "Loading Map..."
+            Refresh()
+            Dim map = WC3.Map.FromFile(filePath:=mapOpenFileDialog.FileName,
+                                       wc3MapFolder:=curFolder.FullName,
+                                       wc3PatchMPQFolder:=curFolder.Parent.FullName)
+            Dim oldEntry = DirectCast(dataReplay(2, 1).Value, ReplayEntry)
+            Dim oldValue = DirectCast(oldEntry.Payload.Value, NamedValueMap)
+            Dim oldGameStats = oldValue.ItemAs(Of GameStats)("game stats")
+            Dim newGameStats = GameStats.FromMapAndSettings(map,
+                                                            oldGameStats.RandomHero,
+                                                            oldGameStats.RandomRace,
+                                                            oldGameStats.AllowFullSharedControl,
+                                                            oldGameStats.LockTeams,
+                                                            oldGameStats.TeamsTogether,
+                                                            oldGameStats.Observers,
+                                                            oldGameStats.Visibility,
+                                                            oldGameStats.Speed,
+                                                            oldGameStats.HostName)
+            Dim newValue = oldValue.ToDictionary(Function(e) e.Key, Function(e) If(e.Key = "game stats", newGameStats, e.Value))
+            Dim newEntry = ReplayEntry.FromValue(Replay.Format.ReplayEntryStartOfReplay, newValue)
+            lblTargetMap.Text = newGameStats.AdvertisedPath
+            dataReplay(2, 1).Value = newEntry
+            OnGridSelectionChanged()
+        Catch ex As Exception
+            MessageBox.Show("Error loading map: {0}".Frmt(ex))
         End Try
+    End Sub
+
+    Private Sub OnClickModeExploreReplay() Handles mnuModeExploreReplay.Click
+        mnuModeEditReplay.Checked = False
+        mnuModeExploreReplay.Checked = True
+        panelEditControls.Visible = False
+        filterReplayControl.Visible = True
+        RefreshReplayView()
+    End Sub
+    Private Sub OnClickModeEditReplay() Handles mnuModeEditReplay.Click
+        mnuModeEditReplay.Checked = True
+        mnuModeExploreReplay.Checked = False
+        panelEditControls.Visible = True
+        filterReplayControl.Visible = False
+        RefreshReplayView()
+    End Sub
+
+    Private Sub OnClickSaveAs() Handles mnuSaveAs.Click
+        If replaySaveFileDialog.ShowDialog(Me) <> DialogResult.OK Then Return
+        Using w = New ReplayWriter(stream:=New IO.FileStream(replaySaveFileDialog.FileName, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.None).AsRandomWritableStream,
+                                   settings:=_headerReplay.Settings,
+                                   wc3Version:=_headerReplay.WC3Version,
+                                   duration:=CUInt(_headerReplay.GameDuration.TotalMilliseconds),
+                                   replayVersion:=_headerReplay.ReplayVersion)
+            For i = 1 To dataReplay.RowCount - 2
+                w.WriteEntry(DirectCast(dataReplay(2, i).Value, ReplayEntry))
+            Next i
+        End Using
+
+        _loadedReplay = ReplayReader.FromFile(replaySaveFileDialog.FileName)
+        _headerReplay = _loadedReplay
+        Me.Text = Application.ProductName + ": " + IO.Path.GetFileName(replaySaveFileDialog.FileName)
     End Sub
 End Class

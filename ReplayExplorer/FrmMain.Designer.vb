@@ -25,34 +25,38 @@ Partial Class FrmMain
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FrmMain))
         Me.dataReplay = New System.Windows.Forms.DataGridView()
-        Me.txtMinGameTime = New System.Windows.Forms.TextBox()
-        Me.txtMaxGameTime = New System.Windows.Forms.TextBox()
-        Me.lblMinGameTime = New System.Windows.Forms.Label()
-        Me.lblMaxGameTime = New System.Windows.Forms.Label()
-        Me.lblPlayerFilter = New System.Windows.Forms.Label()
-        Me.lscFilterPlayers = New System.Windows.Forms.CheckedListBox()
+        Me.colEntryType = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colGameTime = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colDescription = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.mnuMain = New System.Windows.Forms.MenuStrip()
         Me.mnuFile = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuOpen = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuSaveAs = New System.Windows.Forms.ToolStripMenuItem()
+        Me.EditToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuModeExploreReplay = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuModeEditReplay = New System.Windows.Forms.ToolStripMenuItem()
         Me.replayOpenFileDialog = New System.Windows.Forms.OpenFileDialog()
         Me.txtDesc = New System.Windows.Forms.TextBox()
-        Me.chkIgnoreEmptyTicks = New System.Windows.Forms.CheckBox()
-        Me.lscActionTypes = New System.Windows.Forms.CheckedListBox()
-        Me.Label1 = New System.Windows.Forms.Label()
-        Me.btnAllActionTypes = New System.Windows.Forms.Button()
-        Me.btnNoActionTypes = New System.Windows.Forms.Button()
-        Me.lscEntryTypeFilter = New System.Windows.Forms.CheckedListBox()
-        Me.lblEntryTypeFilter = New System.Windows.Forms.Label()
         Me.lscActionTypeFilter = New System.Windows.Forms.CheckedListBox()
         Me.chkSkipEmptyTicks = New System.Windows.Forms.CheckBox()
         Me.pbrLoadingReplay = New System.Windows.Forms.ProgressBar()
         Me.lblProgress = New System.Windows.Forms.Label()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
-        Me.colEntryType = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colGameTime = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colDescription = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.panelEditControls = New System.Windows.Forms.Panel()
+        Me.lblTargetMap = New System.Windows.Forms.Label()
+        Me.lblReplayVersion = New System.Windows.Forms.Label()
+        Me.Label3 = New System.Windows.Forms.Label()
+        Me.Label2 = New System.Windows.Forms.Label()
+        Me.Label1 = New System.Windows.Forms.Label()
+        Me.btnChangeTargetMap = New System.Windows.Forms.Button()
+        Me.btnImportReplayVersion = New System.Windows.Forms.Button()
+        Me.btnEditSelectedEntry = New System.Windows.Forms.Button()
+        Me.mapOpenFileDialog = New System.Windows.Forms.OpenFileDialog()
+        Me.filterReplayControl = New ReplayExplorer.FilterControl()
+        Me.replaySaveFileDialog = New System.Windows.Forms.SaveFileDialog()
         CType(Me.dataReplay, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.mnuMain.SuspendLayout()
+        Me.panelEditControls.SuspendLayout()
         Me.SuspendLayout()
         '
         'dataReplay
@@ -70,218 +74,8 @@ Partial Class FrmMain
         Me.dataReplay.Name = "dataReplay"
         Me.dataReplay.ReadOnly = True
         Me.dataReplay.RowHeadersVisible = False
-        Me.dataReplay.Size = New System.Drawing.Size(996, 250)
+        Me.dataReplay.Size = New System.Drawing.Size(671, 224)
         Me.dataReplay.TabIndex = 0
-        '
-        'txtMinGameTime
-        '
-        Me.txtMinGameTime.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.txtMinGameTime.Location = New System.Drawing.Point(12, 296)
-        Me.txtMinGameTime.Name = "txtMinGameTime"
-        Me.txtMinGameTime.Size = New System.Drawing.Size(112, 20)
-        Me.txtMinGameTime.TabIndex = 1
-        Me.ToolTip1.SetToolTip(Me.txtMinGameTime, "Entries before this game time will be ignored." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Leave blank to not use a minimum." & _
-                "")
-        '
-        'txtMaxGameTime
-        '
-        Me.txtMaxGameTime.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.txtMaxGameTime.Location = New System.Drawing.Point(12, 336)
-        Me.txtMaxGameTime.Name = "txtMaxGameTime"
-        Me.txtMaxGameTime.Size = New System.Drawing.Size(112, 20)
-        Me.txtMaxGameTime.TabIndex = 2
-        Me.ToolTip1.SetToolTip(Me.txtMaxGameTime, "Entries after this game time will be ignored." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Leave blank to not use a maximum.")
-        '
-        'lblMinGameTime
-        '
-        Me.lblMinGameTime.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.lblMinGameTime.AutoSize = True
-        Me.lblMinGameTime.Location = New System.Drawing.Point(12, 280)
-        Me.lblMinGameTime.Name = "lblMinGameTime"
-        Me.lblMinGameTime.Size = New System.Drawing.Size(81, 13)
-        Me.lblMinGameTime.TabIndex = 3
-        Me.lblMinGameTime.Text = "Min Game Time"
-        '
-        'lblMaxGameTime
-        '
-        Me.lblMaxGameTime.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.lblMaxGameTime.AutoSize = True
-        Me.lblMaxGameTime.Location = New System.Drawing.Point(12, 320)
-        Me.lblMaxGameTime.Name = "lblMaxGameTime"
-        Me.lblMaxGameTime.Size = New System.Drawing.Size(84, 13)
-        Me.lblMaxGameTime.TabIndex = 4
-        Me.lblMaxGameTime.Text = "Max Game Time"
-        '
-        'lblPlayerFilter
-        '
-        Me.lblPlayerFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.lblPlayerFilter.AutoSize = True
-        Me.lblPlayerFilter.Location = New System.Drawing.Point(265, 280)
-        Me.lblPlayerFilter.Name = "lblPlayerFilter"
-        Me.lblPlayerFilter.Size = New System.Drawing.Size(94, 13)
-        Me.lblPlayerFilter.TabIndex = 5
-        Me.lblPlayerFilter.Text = "Action Player Filter"
-        '
-        'lscFilterPlayers
-        '
-        Me.lscFilterPlayers.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.lscFilterPlayers.FormattingEnabled = True
-        Me.lscFilterPlayers.Location = New System.Drawing.Point(268, 296)
-        Me.lscFilterPlayers.Name = "lscFilterPlayers"
-        Me.lscFilterPlayers.Size = New System.Drawing.Size(140, 184)
-        Me.lscFilterPlayers.TabIndex = 7
-        Me.ToolTip1.SetToolTip(Me.lscFilterPlayers, "Ticks which don't have actions from any of these players will be skipped.")
-        '
-        'mnuMain
-        '
-        Me.mnuMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuFile})
-        Me.mnuMain.Location = New System.Drawing.Point(0, 0)
-        Me.mnuMain.Name = "mnuMain"
-        Me.mnuMain.Size = New System.Drawing.Size(996, 24)
-        Me.mnuMain.TabIndex = 10
-        Me.mnuMain.Text = "MenuStrip1"
-        '
-        'mnuFile
-        '
-        Me.mnuFile.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuOpen})
-        Me.mnuFile.Name = "mnuFile"
-        Me.mnuFile.Size = New System.Drawing.Size(37, 20)
-        Me.mnuFile.Text = "File"
-        '
-        'mnuOpen
-        '
-        Me.mnuOpen.Name = "mnuOpen"
-        Me.mnuOpen.Size = New System.Drawing.Size(103, 22)
-        Me.mnuOpen.Text = "Open"
-        '
-        'txtDesc
-        '
-        Me.txtDesc.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
-                    Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.txtDesc.Location = New System.Drawing.Point(560, 283)
-        Me.txtDesc.Multiline = True
-        Me.txtDesc.Name = "txtDesc"
-        Me.txtDesc.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtDesc.Size = New System.Drawing.Size(436, 199)
-        Me.txtDesc.TabIndex = 11
-        Me.txtDesc.WordWrap = False
-        '
-        'chkIgnoreEmptyTicks
-        '
-        Me.chkIgnoreEmptyTicks.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.chkIgnoreEmptyTicks.AutoSize = True
-        Me.chkIgnoreEmptyTicks.Checked = True
-        Me.chkIgnoreEmptyTicks.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.chkIgnoreEmptyTicks.Location = New System.Drawing.Point(12, 362)
-        Me.chkIgnoreEmptyTicks.Name = "chkIgnoreEmptyTicks"
-        Me.chkIgnoreEmptyTicks.Size = New System.Drawing.Size(112, 17)
-        Me.chkIgnoreEmptyTicks.TabIndex = 13
-        Me.chkIgnoreEmptyTicks.Text = "Ignore empty ticks"
-        Me.ToolTip1.SetToolTip(Me.chkIgnoreEmptyTicks, "Determines if ticks with no actions are shown.")
-        Me.chkIgnoreEmptyTicks.UseVisualStyleBackColor = True
-        '
-        'lscActionTypes
-        '
-        Me.lscActionTypes.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.lscActionTypes.FormattingEnabled = True
-        Me.lscActionTypes.HorizontalScrollbar = True
-        Me.lscActionTypes.Location = New System.Drawing.Point(414, 296)
-        Me.lscActionTypes.Name = "lscActionTypes"
-        Me.lscActionTypes.Size = New System.Drawing.Size(140, 169)
-        Me.lscActionTypes.TabIndex = 16
-        Me.ToolTip1.SetToolTip(Me.lscActionTypes, "Ticks which don't have any of these action types will be skipped.")
-        '
-        'Label1
-        '
-        Me.Label1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(411, 280)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(89, 13)
-        Me.Label1.TabIndex = 15
-        Me.Label1.Text = "Action Type Filter"
-        '
-        'btnAllActionTypes
-        '
-        Me.btnAllActionTypes.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.btnAllActionTypes.Location = New System.Drawing.Point(489, 464)
-        Me.btnAllActionTypes.Name = "btnAllActionTypes"
-        Me.btnAllActionTypes.Size = New System.Drawing.Size(65, 19)
-        Me.btnAllActionTypes.TabIndex = 17
-        Me.btnAllActionTypes.Text = "All"
-        Me.btnAllActionTypes.UseVisualStyleBackColor = True
-        '
-        'btnNoActionTypes
-        '
-        Me.btnNoActionTypes.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.btnNoActionTypes.Location = New System.Drawing.Point(414, 464)
-        Me.btnNoActionTypes.Name = "btnNoActionTypes"
-        Me.btnNoActionTypes.Size = New System.Drawing.Size(65, 19)
-        Me.btnNoActionTypes.TabIndex = 18
-        Me.btnNoActionTypes.Text = "None"
-        Me.btnNoActionTypes.UseVisualStyleBackColor = True
-        '
-        'lscEntryTypeFilter
-        '
-        Me.lscEntryTypeFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.lscEntryTypeFilter.FormattingEnabled = True
-        Me.lscEntryTypeFilter.HorizontalScrollbar = True
-        Me.lscEntryTypeFilter.Location = New System.Drawing.Point(133, 296)
-        Me.lscEntryTypeFilter.Name = "lscEntryTypeFilter"
-        Me.lscEntryTypeFilter.Size = New System.Drawing.Size(129, 184)
-        Me.lscEntryTypeFilter.TabIndex = 20
-        Me.ToolTip1.SetToolTip(Me.lscEntryTypeFilter, "Entries of a type not checked here will be ignored.")
-        '
-        'lblEntryTypeFilter
-        '
-        Me.lblEntryTypeFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.lblEntryTypeFilter.AutoSize = True
-        Me.lblEntryTypeFilter.Location = New System.Drawing.Point(130, 280)
-        Me.lblEntryTypeFilter.Name = "lblEntryTypeFilter"
-        Me.lblEntryTypeFilter.Size = New System.Drawing.Size(83, 13)
-        Me.lblEntryTypeFilter.TabIndex = 19
-        Me.lblEntryTypeFilter.Text = "Entry Type Filter"
-        '
-        'lscActionTypeFilter
-        '
-        Me.lscActionTypeFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.lscActionTypeFilter.FormattingEnabled = True
-        Me.lscActionTypeFilter.HorizontalScrollbar = True
-        Me.lscActionTypeFilter.Location = New System.Drawing.Point(133, 296)
-        Me.lscActionTypeFilter.Name = "lscActionTypeFilter"
-        Me.lscActionTypeFilter.Size = New System.Drawing.Size(129, 184)
-        Me.lscActionTypeFilter.TabIndex = 20
-        '
-        'chkSkipEmptyTicks
-        '
-        Me.chkSkipEmptyTicks.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.chkSkipEmptyTicks.AutoSize = True
-        Me.chkSkipEmptyTicks.Location = New System.Drawing.Point(12, 362)
-        Me.chkSkipEmptyTicks.Name = "chkSkipEmptyTicks"
-        Me.chkSkipEmptyTicks.Size = New System.Drawing.Size(109, 17)
-        Me.chkSkipEmptyTicks.TabIndex = 13
-        Me.chkSkipEmptyTicks.Text = "Ignore empty ticks"
-        Me.chkSkipEmptyTicks.UseVisualStyleBackColor = True
-        '
-        'pbrLoadingReplay
-        '
-        Me.pbrLoadingReplay.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.pbrLoadingReplay.Location = New System.Drawing.Point(12, 460)
-        Me.pbrLoadingReplay.Name = "pbrLoadingReplay"
-        Me.pbrLoadingReplay.Size = New System.Drawing.Size(115, 20)
-        Me.pbrLoadingReplay.TabIndex = 21
-        Me.pbrLoadingReplay.Visible = False
-        '
-        'lblProgress
-        '
-        Me.lblProgress.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.lblProgress.AutoSize = True
-        Me.lblProgress.Location = New System.Drawing.Point(12, 444)
-        Me.lblProgress.Name = "lblProgress"
-        Me.lblProgress.Size = New System.Drawing.Size(90, 13)
-        Me.lblProgress.TabIndex = 22
-        Me.lblProgress.Text = "Loading Replay..."
-        Me.lblProgress.Visible = False
         '
         'colEntryType
         '
@@ -309,27 +103,238 @@ Partial Class FrmMain
         Me.colDescription.ReadOnly = True
         Me.colDescription.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
         '
+        'mnuMain
+        '
+        Me.mnuMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuFile, Me.EditToolStripMenuItem})
+        Me.mnuMain.Location = New System.Drawing.Point(0, 0)
+        Me.mnuMain.Name = "mnuMain"
+        Me.mnuMain.Size = New System.Drawing.Size(671, 24)
+        Me.mnuMain.TabIndex = 10
+        Me.mnuMain.Text = "MenuStrip1"
+        '
+        'mnuFile
+        '
+        Me.mnuFile.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuOpen, Me.mnuSaveAs})
+        Me.mnuFile.Name = "mnuFile"
+        Me.mnuFile.Size = New System.Drawing.Size(37, 20)
+        Me.mnuFile.Text = "File"
+        '
+        'mnuOpen
+        '
+        Me.mnuOpen.Name = "mnuOpen"
+        Me.mnuOpen.Size = New System.Drawing.Size(152, 22)
+        Me.mnuOpen.Text = "Open"
+        '
+        'mnuSaveAs
+        '
+        Me.mnuSaveAs.Enabled = False
+        Me.mnuSaveAs.Name = "mnuSaveAs"
+        Me.mnuSaveAs.Size = New System.Drawing.Size(152, 22)
+        Me.mnuSaveAs.Text = "Save As ..."
+        '
+        'EditToolStripMenuItem
+        '
+        Me.EditToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuModeExploreReplay, Me.mnuModeEditReplay})
+        Me.EditToolStripMenuItem.Name = "EditToolStripMenuItem"
+        Me.EditToolStripMenuItem.Size = New System.Drawing.Size(50, 20)
+        Me.EditToolStripMenuItem.Text = "Mode"
+        '
+        'mnuModeExploreReplay
+        '
+        Me.mnuModeExploreReplay.Checked = True
+        Me.mnuModeExploreReplay.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.mnuModeExploreReplay.Name = "mnuModeExploreReplay"
+        Me.mnuModeExploreReplay.Size = New System.Drawing.Size(150, 22)
+        Me.mnuModeExploreReplay.Text = "Explore Replay"
+        '
+        'mnuModeEditReplay
+        '
+        Me.mnuModeEditReplay.Name = "mnuModeEditReplay"
+        Me.mnuModeEditReplay.Size = New System.Drawing.Size(150, 22)
+        Me.mnuModeEditReplay.Text = "Edit Replay"
+        '
+        'replayOpenFileDialog
+        '
+        Me.replayOpenFileDialog.Filter = "Warcraft 3 Replay Files (*.w3g)|*.w3g"
+        '
+        'txtDesc
+        '
+        Me.txtDesc.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
+                    Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtDesc.Location = New System.Drawing.Point(426, 257)
+        Me.txtDesc.Multiline = True
+        Me.txtDesc.Name = "txtDesc"
+        Me.txtDesc.ScrollBars = System.Windows.Forms.ScrollBars.Both
+        Me.txtDesc.Size = New System.Drawing.Size(245, 199)
+        Me.txtDesc.TabIndex = 11
+        Me.txtDesc.WordWrap = False
+        '
+        'lscActionTypeFilter
+        '
+        Me.lscActionTypeFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.lscActionTypeFilter.FormattingEnabled = True
+        Me.lscActionTypeFilter.HorizontalScrollbar = True
+        Me.lscActionTypeFilter.Location = New System.Drawing.Point(133, 296)
+        Me.lscActionTypeFilter.Name = "lscActionTypeFilter"
+        Me.lscActionTypeFilter.Size = New System.Drawing.Size(129, 184)
+        Me.lscActionTypeFilter.TabIndex = 20
+        '
+        'chkSkipEmptyTicks
+        '
+        Me.chkSkipEmptyTicks.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.chkSkipEmptyTicks.AutoSize = True
+        Me.chkSkipEmptyTicks.Location = New System.Drawing.Point(12, 362)
+        Me.chkSkipEmptyTicks.Name = "chkSkipEmptyTicks"
+        Me.chkSkipEmptyTicks.Size = New System.Drawing.Size(109, 17)
+        Me.chkSkipEmptyTicks.TabIndex = 13
+        Me.chkSkipEmptyTicks.Text = "Ignore empty ticks"
+        Me.chkSkipEmptyTicks.UseVisualStyleBackColor = True
+        '
+        'pbrLoadingReplay
+        '
+        Me.pbrLoadingReplay.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.pbrLoadingReplay.Location = New System.Drawing.Point(369, 4)
+        Me.pbrLoadingReplay.Name = "pbrLoadingReplay"
+        Me.pbrLoadingReplay.Size = New System.Drawing.Size(290, 20)
+        Me.pbrLoadingReplay.TabIndex = 21
+        Me.pbrLoadingReplay.Visible = False
+        '
+        'lblProgress
+        '
+        Me.lblProgress.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblProgress.AutoSize = True
+        Me.lblProgress.Location = New System.Drawing.Point(273, 9)
+        Me.lblProgress.Name = "lblProgress"
+        Me.lblProgress.Size = New System.Drawing.Size(90, 13)
+        Me.lblProgress.TabIndex = 22
+        Me.lblProgress.Text = "Loading Replay..."
+        Me.lblProgress.Visible = False
+        '
+        'panelEditControls
+        '
+        Me.panelEditControls.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.panelEditControls.Controls.Add(Me.lblTargetMap)
+        Me.panelEditControls.Controls.Add(Me.lblReplayVersion)
+        Me.panelEditControls.Controls.Add(Me.Label3)
+        Me.panelEditControls.Controls.Add(Me.Label2)
+        Me.panelEditControls.Controls.Add(Me.Label1)
+        Me.panelEditControls.Controls.Add(Me.btnChangeTargetMap)
+        Me.panelEditControls.Controls.Add(Me.btnImportReplayVersion)
+        Me.panelEditControls.Controls.Add(Me.btnEditSelectedEntry)
+        Me.panelEditControls.Location = New System.Drawing.Point(0, 257)
+        Me.panelEditControls.Name = "panelEditControls"
+        Me.panelEditControls.Size = New System.Drawing.Size(420, 199)
+        Me.panelEditControls.TabIndex = 24
+        Me.panelEditControls.Visible = False
+        '
+        'lblTargetMap
+        '
+        Me.lblTargetMap.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblTargetMap.Location = New System.Drawing.Point(158, 65)
+        Me.lblTargetMap.Name = "lblTargetMap"
+        Me.lblTargetMap.Size = New System.Drawing.Size(259, 30)
+        Me.lblTargetMap.TabIndex = 7
+        Me.lblTargetMap.Text = "Target Map"
+        Me.lblTargetMap.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'lblReplayVersion
+        '
+        Me.lblReplayVersion.AutoSize = True
+        Me.lblReplayVersion.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblReplayVersion.Location = New System.Drawing.Point(158, 12)
+        Me.lblReplayVersion.Name = "lblReplayVersion"
+        Me.lblReplayVersion.Size = New System.Drawing.Size(92, 13)
+        Me.lblReplayVersion.TabIndex = 6
+        Me.lblReplayVersion.Text = "Replay Version"
+        '
+        'Label3
+        '
+        Me.Label3.AutoSize = True
+        Me.Label3.Location = New System.Drawing.Point(9, 36)
+        Me.Label3.Name = "Label3"
+        Me.Label3.Size = New System.Drawing.Size(364, 26)
+        Me.Label3.TabIndex = 5
+        Me.Label3.Text = "Allows you to update the replay's version, by importing it from another replay." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & _
+            "(Can make old replays compatible, but the game may play out differently.)"
+        '
+        'Label2
+        '
+        Me.Label2.AutoSize = True
+        Me.Label2.Location = New System.Drawing.Point(9, 98)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Size = New System.Drawing.Size(282, 26)
+        Me.Label2.TabIndex = 4
+        Me.Label2.Text = "Allows you to select the map the replay says it applies to." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "(The new map should " & _
+            "be extremely similar to the true map.)"
+        '
+        'Label1
+        '
+        Me.Label1.AutoSize = True
+        Me.Label1.Location = New System.Drawing.Point(9, 160)
+        Me.Label1.Name = "Label1"
+        Me.Label1.Size = New System.Drawing.Size(290, 26)
+        Me.Label1.TabIndex = 3
+        Me.Label1.Text = "Allows you to edit the raw data making up a replay entry." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "(Intended for advanced" & _
+            " users who understand the protocol.)"
+        '
+        'btnChangeTargetMap
+        '
+        Me.btnChangeTargetMap.Enabled = False
+        Me.btnChangeTargetMap.Location = New System.Drawing.Point(12, 65)
+        Me.btnChangeTargetMap.Name = "btnChangeTargetMap"
+        Me.btnChangeTargetMap.Size = New System.Drawing.Size(140, 30)
+        Me.btnChangeTargetMap.TabIndex = 2
+        Me.btnChangeTargetMap.Text = "Change Target Map"
+        Me.btnChangeTargetMap.UseVisualStyleBackColor = True
+        '
+        'btnImportReplayVersion
+        '
+        Me.btnImportReplayVersion.Enabled = False
+        Me.btnImportReplayVersion.Location = New System.Drawing.Point(12, 3)
+        Me.btnImportReplayVersion.Name = "btnImportReplayVersion"
+        Me.btnImportReplayVersion.Size = New System.Drawing.Size(140, 30)
+        Me.btnImportReplayVersion.TabIndex = 1
+        Me.btnImportReplayVersion.Text = "Import Replay Version"
+        Me.btnImportReplayVersion.UseVisualStyleBackColor = True
+        '
+        'btnEditSelectedEntry
+        '
+        Me.btnEditSelectedEntry.Enabled = False
+        Me.btnEditSelectedEntry.Location = New System.Drawing.Point(12, 127)
+        Me.btnEditSelectedEntry.Name = "btnEditSelectedEntry"
+        Me.btnEditSelectedEntry.Size = New System.Drawing.Size(140, 30)
+        Me.btnEditSelectedEntry.TabIndex = 0
+        Me.btnEditSelectedEntry.Text = "Edit Selected Entry"
+        Me.btnEditSelectedEntry.UseVisualStyleBackColor = True
+        '
+        'mapOpenFileDialog
+        '
+        Me.mapOpenFileDialog.Filter = "WC3 Map Files (*.w3m;*.w3x)|*.w3m;*.w3x"
+        '
+        'filterReplayControl
+        '
+        Me.filterReplayControl.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.filterReplayControl.AutoScroll = True
+        Me.filterReplayControl.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.filterReplayControl.Location = New System.Drawing.Point(0, 257)
+        Me.filterReplayControl.Name = "filterReplayControl"
+        Me.filterReplayControl.Size = New System.Drawing.Size(420, 199)
+        Me.filterReplayControl.TabIndex = 23
+        '
+        'replaySaveFileDialog
+        '
+        Me.replaySaveFileDialog.Filter = "Warcraft 3 Replays (*.w3g)|*.w3g"
+        '
         'FrmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(996, 483)
-        Me.Controls.Add(Me.lblProgress)
+        Me.ClientSize = New System.Drawing.Size(671, 457)
+        Me.Controls.Add(Me.panelEditControls)
+        Me.Controls.Add(Me.filterReplayControl)
         Me.Controls.Add(Me.pbrLoadingReplay)
-        Me.Controls.Add(Me.lscEntryTypeFilter)
-        Me.Controls.Add(Me.lblEntryTypeFilter)
-        Me.Controls.Add(Me.btnNoActionTypes)
-        Me.Controls.Add(Me.btnAllActionTypes)
-        Me.Controls.Add(Me.lscActionTypes)
-        Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.chkIgnoreEmptyTicks)
+        Me.Controls.Add(Me.lblProgress)
         Me.Controls.Add(Me.txtDesc)
-        Me.Controls.Add(Me.lscFilterPlayers)
-        Me.Controls.Add(Me.lblPlayerFilter)
-        Me.Controls.Add(Me.lblMaxGameTime)
-        Me.Controls.Add(Me.lblMinGameTime)
-        Me.Controls.Add(Me.txtMaxGameTime)
-        Me.Controls.Add(Me.txtMinGameTime)
         Me.Controls.Add(Me.dataReplay)
         Me.Controls.Add(Me.mnuMain)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -339,29 +344,18 @@ Partial Class FrmMain
         CType(Me.dataReplay, System.ComponentModel.ISupportInitialize).EndInit()
         Me.mnuMain.ResumeLayout(False)
         Me.mnuMain.PerformLayout()
+        Me.panelEditControls.ResumeLayout(False)
+        Me.panelEditControls.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
     Friend WithEvents dataReplay As System.Windows.Forms.DataGridView
-    Friend WithEvents txtMinGameTime As System.Windows.Forms.TextBox
-    Friend WithEvents txtMaxGameTime As System.Windows.Forms.TextBox
-    Friend WithEvents lblMinGameTime As System.Windows.Forms.Label
-    Friend WithEvents lblMaxGameTime As System.Windows.Forms.Label
-    Friend WithEvents lblPlayerFilter As System.Windows.Forms.Label
-    Friend WithEvents lscFilterPlayers As System.Windows.Forms.CheckedListBox
     Friend WithEvents mnuMain As System.Windows.Forms.MenuStrip
     Friend WithEvents mnuFile As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents mnuOpen As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents replayOpenFileDialog As System.Windows.Forms.OpenFileDialog
     Friend WithEvents txtDesc As System.Windows.Forms.TextBox
-    Friend WithEvents chkIgnoreEmptyTicks As System.Windows.Forms.CheckBox
-    Friend WithEvents lscActionTypes As System.Windows.Forms.CheckedListBox
-    Friend WithEvents Label1 As System.Windows.Forms.Label
-    Friend WithEvents btnAllActionTypes As System.Windows.Forms.Button
-    Friend WithEvents btnNoActionTypes As System.Windows.Forms.Button
-    Friend WithEvents lscEntryTypeFilter As System.Windows.Forms.CheckedListBox
-    Friend WithEvents lblEntryTypeFilter As System.Windows.Forms.Label
     Friend WithEvents lscActionTypeFilter As System.Windows.Forms.CheckedListBox
     Friend WithEvents chkSkipEmptyTicks As System.Windows.Forms.CheckBox
     Friend WithEvents pbrLoadingReplay As System.Windows.Forms.ProgressBar
@@ -370,5 +364,21 @@ Partial Class FrmMain
     Friend WithEvents colGameTime As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colDescription As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
+    Friend WithEvents EditToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents mnuSaveAs As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents filterReplayControl As ReplayExplorer.FilterControl
+    Friend WithEvents panelEditControls As System.Windows.Forms.Panel
+    Friend WithEvents Label3 As System.Windows.Forms.Label
+    Friend WithEvents Label2 As System.Windows.Forms.Label
+    Friend WithEvents Label1 As System.Windows.Forms.Label
+    Friend WithEvents btnChangeTargetMap As System.Windows.Forms.Button
+    Friend WithEvents btnImportReplayVersion As System.Windows.Forms.Button
+    Friend WithEvents btnEditSelectedEntry As System.Windows.Forms.Button
+    Friend WithEvents mnuModeExploreReplay As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents mnuModeEditReplay As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents mapOpenFileDialog As System.Windows.Forms.OpenFileDialog
+    Friend WithEvents replaySaveFileDialog As System.Windows.Forms.SaveFileDialog
+    Friend WithEvents lblTargetMap As System.Windows.Forms.Label
+    Friend WithEvents lblReplayVersion As System.Windows.Forms.Label
 
 End Class

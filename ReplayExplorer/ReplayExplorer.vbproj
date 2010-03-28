@@ -26,9 +26,12 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>3</ApplicationRevision>
+    <ProductName>Replay Explorer</ProductName>
+    <PublisherName>Strilanc</PublisherName>
+    <ApplicationRevision>4</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
+    <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -112,6 +115,18 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FilterControl.Designer.vb">
+      <DependentUpon>FilterControl.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FilterControl.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="FrmEditEntry.Designer.vb">
+      <DependentUpon>FrmEditEntry.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmEditEntry.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="FrmMain.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -136,6 +151,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="FilterControl.resx">
+      <DependentUpon>FilterControl.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmEditEntry.resx">
+      <DependentUpon>FrmEditEntry.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.vb</DependentUpon>
     </EmbeddedResource>
