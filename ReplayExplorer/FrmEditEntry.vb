@@ -26,6 +26,42 @@ Public Class FrmEditEntry
             Me.pickle = pickle
             txtRawData.Text = pickle.Data.ToHexString
             txtParsed.Text = pickle.Description.Value
+            RefreshStructuredView()
+        Finally
+            allowEvents = True
+        End Try
+    End Sub
+    Private Sub RecursiveAddValidatedHandler(ByVal control As Control, ByVal action As EventHandler)
+        AddHandler control.Validated, action
+        For Each child As Control In control.Controls
+            RecursiveAddValidatedHandler(child, action)
+        Next child
+    End Sub
+    Private Sub RefreshStructuredView()
+        Panel1.Controls.Clear()
+        Dim control = jar.ValueToControl(pickle.Value)
+        control.Width = Panel1.Width
+        control.Anchor = AnchorStyles.Left Or AnchorStyles.Right Or AnchorStyles.Top
+        Panel1.Controls.Add(control)
+        RecursiveAddValidatedHandler(control, Sub() StructuredUpdate())
+    End Sub
+
+    Private Sub StructuredUpdate()
+        If Not allowEvents Then Return
+        Try
+            allowEvents = False
+            Dim pickle = jar.Pack(jar.ControlToValue(Panel1.Controls(0)))
+            Me.pickle = pickle
+            Me.txtParsed.Text = pickle.Description.Value
+            Me.txtRawData.Text = pickle.Data.ToHexString
+            txtRawData.Enabled = True
+            txtParsed.BackColor = SystemColors.Window
+            btnApply.Enabled = True
+        Catch ex As Exception
+            Me.txtParsed.Text = ex.ToString
+            txtParsed.BackColor = Color.Pink
+            txtRawData.Enabled = False
+            btnApply.Enabled = False
         Finally
             allowEvents = True
         End Try
@@ -43,6 +79,8 @@ Public Class FrmEditEntry
             If pickle.Data.Count < data.Count Then
                 txtParsed.Text = "Warning: Data leftover [{0}]".Frmt(data.SubView(pickle.Data.Count).ToHexString) + Environment.NewLine + txtParsed.Text
             End If
+            btnRefresh.Enabled = True
+            Panel1.Controls(0).Enabled = False
             Return True
         Catch ex As Exception
             Me.txtParsed.Text = ex.ToString
@@ -57,6 +95,10 @@ Public Class FrmEditEntry
         btnApply.Enabled = TrySavePickle()
     End Sub
 
+    Private Sub OnRefreshClick() Handles btnRefresh.Click
+        RefreshStructuredView()
+        btnRefresh.Enabled = False
+    End Sub
     Private Sub btnApply_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnApply.Click
         Me.Dispose()
     End Sub

@@ -137,7 +137,7 @@ Public Class FilterControl
         Get
             Dim timeFilter = Me.TimeFilter()
             Dim playerFilter = Me.PlayerFilter()
-            Dim entryFilter = Me.PlayerFilter()
+            Dim entryFilter = Me.EntryFilter()
             Dim actionFilter = Me.ActionFilter()
             Return Function(time, entry) playerFilter(time, entry) AndAlso
                                          entryFilter(time, entry) AndAlso
