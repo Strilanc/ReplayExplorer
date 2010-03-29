@@ -47,21 +47,20 @@ Partial Class FrmEditEntry
         '
         'txtParsed
         '
-        Me.txtParsed.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-                    Or System.Windows.Forms.AnchorStyles.Left) _
+        Me.txtParsed.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
                     Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.txtParsed.Location = New System.Drawing.Point(320, 328)
+        Me.txtParsed.Location = New System.Drawing.Point(320, 270)
         Me.txtParsed.Multiline = True
         Me.txtParsed.Name = "txtParsed"
         Me.txtParsed.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtParsed.Size = New System.Drawing.Size(513, 180)
+        Me.txtParsed.Size = New System.Drawing.Size(513, 238)
         Me.txtParsed.TabIndex = 5
         Me.txtParsed.WordWrap = False
         '
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(320, 312)
+        Me.Label4.Location = New System.Drawing.Point(317, 254)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(40, 13)
         Me.Label4.TabIndex = 4
@@ -69,14 +68,13 @@ Partial Class FrmEditEntry
         '
         'txtRawData
         '
-        Me.txtRawData.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-                    Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtRawData.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txtRawData.Font = New System.Drawing.Font("Courier New", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.txtRawData.Location = New System.Drawing.Point(320, 25)
         Me.txtRawData.Multiline = True
         Me.txtRawData.Name = "txtRawData"
         Me.txtRawData.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-        Me.txtRawData.Size = New System.Drawing.Size(513, 284)
+        Me.txtRawData.Size = New System.Drawing.Size(513, 226)
         Me.txtRawData.TabIndex = 3
         '
         'btnCancel
@@ -100,8 +98,9 @@ Partial Class FrmEditEntry
         '
         'Panel1
         '
-        Me.Panel1.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-                    Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.Panel1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+                    Or System.Windows.Forms.AnchorStyles.Left) _
+                    Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Panel1.AutoScroll = True
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.Panel1.Location = New System.Drawing.Point(12, 25)

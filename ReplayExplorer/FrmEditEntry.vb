@@ -11,6 +11,7 @@ Public Class FrmEditEntry
     Private jar As ISimpleJar
     Private pickle As ISimplePickle
     Private allowEvents As Boolean
+    Private control As ISimpleValueEditor
 
     Public Shared Function EditEntry(ByVal owner As IWin32Window, ByVal jar As ISimpleJar, ByVal pickle As ISimplePickle) As ISimplePickle
         Using f = New FrmEditEntry
@@ -39,18 +40,19 @@ Public Class FrmEditEntry
     End Sub
     Private Sub RefreshStructuredView()
         Panel1.Controls.Clear()
-        Dim control = jar.ValueToControl(pickle.Value)
-        control.Width = Panel1.Width
-        control.Anchor = AnchorStyles.Left Or AnchorStyles.Right Or AnchorStyles.Top
-        Panel1.Controls.Add(control)
-        RecursiveAddValidatedHandler(control, Sub() StructuredUpdate())
+        Me.control = jar.MakeControl()
+        control.Value = pickle.Value
+        control.Control.Width = Panel1.Width
+        control.Control.Anchor = AnchorStyles.Left Or AnchorStyles.Right Or AnchorStyles.Top
+        Panel1.Controls.Add(control.Control)
+        AddHandler control.ValueChanged, Sub() StructuredUpdate()
     End Sub
 
     Private Sub StructuredUpdate()
         If Not allowEvents Then Return
         Try
             allowEvents = False
-            Dim pickle = jar.Pack(jar.ControlToValue(Panel1.Controls(0)))
+            Dim pickle = jar.Pack(control.Value)
             Me.pickle = pickle
             Me.txtParsed.Text = pickle.Description.Value
             Me.txtRawData.Text = pickle.Data.ToHexString
