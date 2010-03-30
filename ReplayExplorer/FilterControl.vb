@@ -26,7 +26,7 @@ Public Class FilterControl
             _ignoreFilterEvents = True
             Dim players = (From entry In replay.Entries.Take(25)
                            Where entry.Id = ReplayEntryId.StartOfReplay OrElse entry.Id = ReplayEntryId.PlayerJoined
-                           Let vals = DirectCast(entry.Payload.Value, NamedValueMap)
+                           Let vals = DirectCast(entry.Payload, NamedValueMap)
                            Select name = vals.ItemAs(Of String)(If(entry.Id = ReplayEntryId.StartOfReplay, "primary player name", "name")),
                                   pid = vals.ItemAs(Of PlayerId)(If(entry.Id = ReplayEntryId.StartOfReplay, "primary player id", "joiner id"))
                            ).ToList
@@ -103,7 +103,7 @@ Public Class FilterControl
             Dim playerPids = (From item In lscFilterPlayers.CheckedItems Select Byte.Parse(item.ToString.Split(":"c)(0))).ToArray
             Return Function(time As UInt32, entry As ReplayEntry)
                        If entry.Id <> ReplayEntryId.Tick Then Return True
-                       Dim vals = DirectCast(entry.Payload.Value, NamedValueMap)
+                       Dim vals = DirectCast(entry.Payload, NamedValueMap)
                        Dim actions = vals.ItemAs(Of IReadableList(Of Tinker.WC3.Protocol.PlayerActionSet))("player action sets")
                        If actions.Count <= 0 Then Return True
                        Return (From action In actions Where playerPids.Contains(action.Id.Index)).Any
@@ -124,7 +124,7 @@ Public Class FilterControl
             Dim actionTypes = (From item In lscActionTypes.CheckedItems Select CType(item, WC3.Protocol.GameActionId)).ToArray
             Return Function(time As UInt32, entry As ReplayEntry)
                        If entry.Id <> ReplayEntryId.Tick Then Return True
-                       Dim vals = DirectCast(entry.Payload.Value, NamedValueMap)
+                       Dim vals = DirectCast(entry.Payload, NamedValueMap)
                        Dim actions = vals.ItemAs(Of IReadableList(Of Tinker.WC3.Protocol.PlayerActionSet))("player action sets")
                        If actions.Count <= 0 Then Return showEmptyActions
                        Return (From actionSet In actions

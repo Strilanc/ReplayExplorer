@@ -26,7 +26,7 @@ Public Class FrmEditEntry
             Me.jar = jar
             Me.pickle = pickle
             txtRawData.Text = pickle.Data.ToHexString
-            txtParsed.Text = pickle.Description.Value
+            txtParsed.Text = pickle.Description
             RefreshStructuredView()
         Finally
             allowEvents = True
@@ -52,9 +52,9 @@ Public Class FrmEditEntry
         If Not allowEvents Then Return
         Try
             allowEvents = False
-            Dim pickle = jar.Pack(control.Value)
+            Dim pickle = jar.PackPickle(control.Value)
             Me.pickle = pickle
-            Me.txtParsed.Text = pickle.Description.Value
+            Me.txtParsed.Text = pickle.Description
             Me.txtRawData.Text = pickle.Data.ToHexString
             txtRawData.Enabled = True
             txtParsed.BackColor = SystemColors.Window
@@ -75,9 +75,9 @@ Public Class FrmEditEntry
                         Where word <> ""
                         Select CByte(word.FromHexToUInt64(ByteOrder.BigEndian))
                         ).ToReadableList
-            Dim pickle = jar.Parse(data)
+            Dim pickle = jar.ParsePickle(data)
             Me.pickle = pickle
-            Me.txtParsed.Text = pickle.Description.Value
+            Me.txtParsed.Text = pickle.Description
             If pickle.Data.Count < data.Count Then
                 txtParsed.Text = "Warning: Data leftover [{0}]".Frmt(data.SubView(pickle.Data.Count).ToHexString) + Environment.NewLine + txtParsed.Text
             End If

@@ -23,7 +23,7 @@ Public Class FrmMain
             _loadedReplay = ReplayReader.FromFile(replayOpenFileDialog.FileName)
             _headerReplay = _loadedReplay
             lblReplayVersion.Text = "Replay Version: {0}".Frmt(_headerReplay.ReplayVersion)
-            lblTargetMap.Text = DirectCast(_loadedReplay.Entries.First.Payload.Value, NamedValueMap).ItemAs(Of GameStats)("game stats").AdvertisedPath
+            lblTargetMap.Text = DirectCast(_loadedReplay.Entries.First.Payload, NamedValueMap).ItemAs(Of GameStats)("game stats").AdvertisedPath
 
             filterReplayControl.LoadReplay(_loadedReplay)
             Me.Text = Application.ProductName + ": " + IO.Path.GetFileName(replayOpenFileDialog.FileName)
@@ -107,7 +107,7 @@ Public Class FrmMain
             For Each entry In replayReader.Entries
                 If workId <> _currentWorkId Then Return 'another operation was started
                 If entry.Id = ReplayEntryId.Tick Then
-                    Dim vals = DirectCast(entry.Payload.Value, NamedValueMap)
+                    Dim vals = DirectCast(entry.Payload, NamedValueMap)
                     gameTime += vals.ItemAs(Of UInt16)("time span")
                 End If
 
@@ -168,7 +168,7 @@ Public Class FrmMain
         Dim cell = Me.dataReplay.SelectedCells(0)
         Dim row = Me.dataReplay.Rows(cell.RowIndex)
         Dim jar = New ReplayEntryJar()
-        Dim pickle = jar.Pack(DirectCast(row.Cells(2).Value, ReplayEntry))
+        Dim pickle = jar.PackPickle(DirectCast(row.Cells(2).Value, ReplayEntry))
         Dim result = FrmEditEntry.EditEntry(Me, jar, pickle)
         If result IsNot Nothing Then
             Dim entry = DirectCast(result.Value, ReplayEntry)
@@ -211,7 +211,7 @@ Public Class FrmMain
                                        wc3MapFolder:=curFolder.FullName,
                                        wc3PatchMPQFolder:=curFolder.Parent.FullName)
             Dim oldEntry = DirectCast(dataReplay(2, 1).Value, ReplayEntry)
-            Dim oldValue = DirectCast(oldEntry.Payload.Value, NamedValueMap)
+            Dim oldValue = DirectCast(oldEntry.Payload, NamedValueMap)
             Dim oldGameStats = oldValue.ItemAs(Of GameStats)("game stats")
             Dim newGameStats = GameStats.FromMapAndSettings(map,
                                                             oldGameStats.RandomHero,
