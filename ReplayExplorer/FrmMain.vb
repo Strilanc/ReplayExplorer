@@ -32,7 +32,8 @@ Public Class FrmMain
             btnImportReplayVersion.Enabled = True
             RefreshReplayView()
         Catch ex As Exception When TypeOf ex Is IO.IOException OrElse
-                                   TypeOf ex Is IO.InvalidDataException
+                                   TypeOf ex Is IO.InvalidDataException OrElse
+                                   TypeOf ex Is PicklingException
             MessageBox.Show("Error loading replay: {0}".Frmt(ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             _loadedReplay = Nothing
         End Try
