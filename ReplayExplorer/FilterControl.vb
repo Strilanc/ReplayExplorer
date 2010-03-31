@@ -42,14 +42,27 @@ Public Class FilterControl
         End Try
     End Sub
 
+    Private Sub OnFilterChangeDelay() Handles lscEntryTypeFilter.ItemCheck,
+                                              lscFilterPlayers.ItemCheck,
+                                              lscActionTypes.ItemCheck
+        If _ignoreFilterEvents Then Return
+        Me.BeginInvoke(Sub() OnFilterChange())
+    End Sub
     Private Sub OnFilterChange() Handles txtMinGameTime.TextChanged,
                                          txtMaxGameTime.TextChanged,
-                                         chkIgnoreEmptyTicks.CheckedChanged,
-                                         lscEntryTypeFilter.ItemCheck,
-                                         lscFilterPlayers.ItemCheck,
-                                         lscActionTypes.ItemCheck
+                                         chkIgnoreEmptyTicks.CheckedChanged
         If _ignoreFilterEvents Then Return
+        Dim i = lscEntryTypeFilter.Items.IndexOf(ReplayEntryId.GameStateChecksum)
+        If i = -1 Then Return
+        chkIgnoreGameStateChecksums.Checked = Not lscEntryTypeFilter.GetItemChecked(i)
         RaiseEvent FilterChanged(Me)
+    End Sub
+    Private Sub OnIgnoreGameStateChecksumsCheckedChanged() Handles chkIgnoreGameStateChecksums.CheckedChanged
+        Dim i = lscEntryTypeFilter.Items.IndexOf(ReplayEntryId.GameStateChecksum)
+        If i = -1 Then Return
+        If chkIgnoreGameStateChecksums.Checked <> Not lscEntryTypeFilter.GetItemChecked(i) Then
+            lscEntryTypeFilter.SetItemChecked(i, Not chkIgnoreGameStateChecksums.Checked)
+        End If
     End Sub
 
     Private Sub OnClickAllActionTypes() Handles btnAllActionTypes.Click
@@ -104,7 +117,7 @@ Public Class FilterControl
             Return Function(time As UInt32, entry As ReplayEntry)
                        If entry.Id <> ReplayEntryId.Tick Then Return True
                        Dim vals = DirectCast(entry.Payload, NamedValueMap)
-                       Dim actions = vals.ItemAs(Of IReadableList(Of Tinker.WC3.Protocol.PlayerActionSet))("player action sets")
+                       Dim actions = vals.ItemAs(Of IReadableList(Of Protocol.PlayerActionSet))("player action sets")
                        If actions.Count <= 0 Then Return True
                        Return (From action In actions Where playerPids.Contains(action.Id.Index)).Any
                    End Function
