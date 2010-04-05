@@ -225,7 +225,7 @@ Public Class FrmMain
         End If
 
         'Save replay data
-        Using w = New ReplayWriter(stream:=New IO.FileStream(replaySaveFileDialog.FileName, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.None).AsRandomWritableStream,
+        Using w = New ReplayWriter(stream:=New IO.FileStream(_filename, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.None).AsRandomWritableStream,
                                    settings:=_headerReplay.Settings,
                                    wc3Version:=_headerReplay.WC3Version,
                                    duration:=CUInt(_headerReplay.GameDuration.TotalMilliseconds),
@@ -236,8 +236,8 @@ Public Class FrmMain
         End Using
 
         'Update loaded replay state
-        _loadedReplay = ReplayReader.FromFile(replaySaveFileDialog.FileName)
+        _loadedReplay = ReplayReader.FromFile(_filename)
         _headerReplay = _loadedReplay
-        Me.Text = Application.ProductName + ": " + IO.Path.GetFileName(replaySaveFileDialog.FileName)
+        Me.Text = "{0}: {1}".Frmt(Application.ProductName, IO.Path.GetFileName(replaySaveFileDialog.FileName))
     End Sub
 End Class
