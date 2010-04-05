@@ -14,6 +14,7 @@ Public Class AsyncReplayDataControl
     Private _currentFilterWorkId As ModByte
     Private _loadingReplay As Boolean
     Private _waitingFilter As Func(Of UInt32, ReplayEntry, Boolean)
+    Private _rows As IList(Of DataGridViewRow)
     Public Const HeaderRowCount As Int32 = 1
     Public Const FooterRowCount As Int32 = 1
 
@@ -52,36 +53,28 @@ Public Class AsyncReplayDataControl
             Return
         End If
 
-        'Hide and filter all the rows
-        Dim rows(0 To dataReplay.RowCount - 1) As DataGridViewRow
-        For i = 0 To dataReplay.RowCount - 1
-            rows(i) = dataReplay.Rows(i)
-        Next i
+        'Hide all rows then progressivly show desired rows
         dataReplay.Rows.Clear()
-
-        'Begin displaying the visible rows
-        ProgressiveFilterRows(_currentFilterWorkId, filter, rows, 0)
+        ProgressiveFilterRows(_currentFilterWorkId, filter, 0)
     End Sub
 
     Private Sub ProgressiveFilterRows(ByVal filterWorkId As ModByte,
                                       ByVal filter As Func(Of UInt32, ReplayEntry, Boolean),
-                                      ByVal rows As IList(Of DataGridViewRow),
                                       ByVal nextRow As Int32)
-        Contract.Requires(rows IsNot Nothing)
 
         'Abort if another operation has started
         If _currentFilterWorkId <> filterWorkId Then Return
 
         'Process for a small amount of time
         Dim t As ModInt32 = Environment.TickCount
-        While nextRow < rows.Count AndAlso (Environment.TickCount() - t).UnsignedValue < 50
+        While nextRow < _rows.Count AndAlso (Environment.TickCount() - t).UnsignedValue < 25
             Dim buffer = New List(Of DataGridViewRow)(capacity:=8196)
-            While nextRow < rows.Count AndAlso buffer.Count < 8196
-                buffer.Add(rows(nextRow))
-                If nextRow >= HeaderRowCount AndAlso nextRow < rows.Count - FooterRowCount Then
-                    Dim gameTime = DirectCast(rows(nextRow).Cells(colGameTime.Index).Value, UInt32)
-                    Dim entry = DirectCast(rows(nextRow).Cells(colEntry.Index).Value, ReplayEntry)
-                    rows(nextRow).Visible = filter(gameTime, entry)
+            While nextRow < _rows.Count AndAlso buffer.Count < 8196
+                buffer.Add(_rows(nextRow))
+                If nextRow >= HeaderRowCount AndAlso nextRow < _rows.Count - FooterRowCount Then
+                    Dim gameTime = DirectCast(_rows(nextRow).Cells(colGameTime.Index).Value, UInt32)
+                    Dim entry = DirectCast(_rows(nextRow).Cells(colEntry.Index).Value, ReplayEntry)
+                    _rows(nextRow).Visible = filter(gameTime, entry)
                 End If
                 nextRow += 1
             End While
@@ -89,13 +82,13 @@ Public Class AsyncReplayDataControl
         End While
 
         'Give control back to the user for a bit before resuming work
-        If nextRow = rows.Count Then
+        If nextRow = _rows.Count Then
             RaiseEvent UpdateProgress(Me, 1, 1, "")
             RaiseEvent FinishedFilteringReplay(Me)
         Else
-            RaiseEvent UpdateProgress(Me, nextRow, rows.Count, "Filtering...")
+            RaiseEvent UpdateProgress(Me, nextRow, _rows.Count, "Filtering...")
             Call New SystemClock().AsyncWait(100.Milliseconds).ContinueWithAction(
-                Sub() Me.BeginInvoke(Sub() ProgressiveFilterRows(filterWorkId, filter, rows, nextRow)))
+                Sub() Me.BeginInvoke(Sub() ProgressiveFilterRows(filterWorkId, filter, nextRow)))
         End If
     End Sub
 
@@ -112,7 +105,7 @@ Public Class AsyncReplayDataControl
         'Process for a small amount of time
         Dim t As ModInt32 = Environment.TickCount
         Dim buffer = New List(Of DataGridViewRow)(capacity:=8196)
-        While Not queue.WasEmpty AndAlso (Environment.TickCount() - t).UnsignedValue < 50
+        While Not queue.WasEmpty AndAlso (Environment.TickCount() - t).UnsignedValue < 25
             buffer.Add(queue.Dequeue)
         End While
         dataReplay.Rows.AddRange(buffer.ToArray)
@@ -127,13 +120,19 @@ Public Class AsyncReplayDataControl
             If Not queue.WasEmpty Then
                 Call New SystemClock().AsyncWait(100.Milliseconds).ContinueWithAction(
                     Sub() Me.BeginInvoke(Sub() ProgressiveAddReplayEntries(fileWorkId, queue, parseProgress, maxParseProgress, lastCall)))
-            ElseIf _waitingFilter IsNot Nothing Then
-                _loadingReplay = False
-                RaiseEvent FinishedLoadingReplay(Me)
-                Call StartFilteringReplay(_waitingFilter)
             Else
+                'Copy rows
+                Dim rows(0 To dataReplay.RowCount - 1) As DataGridViewRow
+                For i = 0 To dataReplay.RowCount - 1
+                    rows(i) = dataReplay.Rows(i)
+                Next i
+                _rows = rows
+
+                'Done loading
                 _loadingReplay = False
-                RaiseEvent UpdateProgress(Me, 1, 1, "")
+                If _waitingFilter Is Nothing Then
+                    RaiseEvent UpdateProgress(Me, 1, 1, "")
+                End If
                 RaiseEvent FinishedLoadingReplay(Me)
             End If
         End If
