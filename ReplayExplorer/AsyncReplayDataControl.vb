@@ -21,20 +21,21 @@ Public Class AsyncReplayDataControl
     Public Event FinishedLoadingReplay(ByVal sender As AsyncReplayDataControl)
     Public Event FinishedFilteringReplay(ByVal sender As AsyncReplayDataControl)
 
+    Public Sub ClearExistingReplay()
+        _currentFileWorkId += CByte(1)
+        _currentFilterWorkId += CByte(1)
+        dataReplay.Rows.Clear()
+        _waitingFilter = Nothing
+        _loadingReplay = False
+    End Sub
     Public Sub StartLoadingReplay(ByVal replay As ReplayReader, ByVal initialFilter As Func(Of UInt32, ReplayEntry, Boolean))
         Contract.Requires(replay IsNot Nothing)
         Contract.Requires(initialFilter IsNot Nothing)
 
-        'Cancel any active operations
-        _currentFileWorkId += CByte(1)
-        _currentFilterWorkId += CByte(1)
-
-        'Prep
-        dataReplay.Rows.Clear()
-        _loadingReplay = True
-        _waitingFilter = Nothing
+        ClearExistingReplay()
 
         'Start the async loading
+        _loadingReplay = True
         Dim fileWorkId = _currentFileWorkId '[hoist a local instead of the member]
         ThreadedAction(Sub() AsyncLoadReplayEntries(replay, fileWorkId, initialFilter))
     End Sub

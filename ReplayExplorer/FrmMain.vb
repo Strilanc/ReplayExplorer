@@ -11,41 +11,68 @@ Imports Tinker.Pickling
 Public Class FrmMain
     Private _loadedReplay As ReplayReader
     Private _headerReplay As ReplayReader
+    Private _pristineReplayFilename As Boolean
+    Private _filename As String
 
     Private Sub OnFormLoad() Handles Me.Load
         Me.Text = Application.ProductName
         AddHandler replayControl.dataReplay.SelectionChanged, Sub() OnGridSelectionChanged()
-        AddHandler replayControl.dataReplay.CellDoubleClick, AddressOf OnGridCellDoubleClick
+        AddHandler replayControl.dataReplay.CellDoubleClick, Sub() OnGridCellDoubleClick()
+    End Sub
+    Private Sub FrmMain_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
+        replayControl.ClearExistingReplay()
     End Sub
 
-    Private Sub OnGridCellDoubleClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs)
+    Private Sub OnGridCellDoubleClick() 'handles setup in OnFormLoad
         Dim cell = Me.replayControl.dataReplay.SelectedCells(0)
         Dim row = Me.replayControl.dataReplay.Rows(cell.RowIndex)
         If TypeOf row.Cells(replayControl.colEntry.Index).Value Is ReplayEntry Then
             OnClickEditEntry()
         End If
     End Sub
-    Private Sub OnClickMenuFileOpen(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles mnuOpen.Click
+    Private Sub OnClickMenuFileOpen() Handles mnuOpen.Click
+        If replayOpenFileDialog.ShowDialog() <> DialogResult.OK Then Return
+        Me.Text = Application.ProductName + ": " + IO.Path.GetFileName(replayOpenFileDialog.FileName)
+
+        'Clear current replay
+        mnuBtnChangeTargetMap.Enabled = False
+        mnuBtnImportReplayVersion.Enabled = False
+        mnuSaveAs.Enabled = False
+        mnuBtnSave.Enabled = False
+        _loadedReplay = Nothing
+        _headerReplay = Nothing
+        _pristineReplayFilename = True
+        replayControl.ClearExistingReplay()
+
+        'Init replay reader
         Try
-            If replayOpenFileDialog.ShowDialog() <> DialogResult.OK Then Return
-            _loadedReplay = ReplayReader.FromFile(replayOpenFileDialog.FileName)
+            _filename = replayOpenFileDialog.FileName
+            _loadedReplay = ReplayReader.FromFile(_filename)
             _headerReplay = _loadedReplay
-            'lblReplayVersion.Text = "Replay Version: {0}".Frmt(_headerReplay.ReplayVersion)
-            'lblTargetMap.Text = DirectCast(_loadedReplay.Entries.First.Payload, NamedValueMap).ItemAs(Of GameStats)("game stats").AdvertisedPath
-
-            filterReplayControl.LoadReplay(_loadedReplay)
-            Me.Text = Application.ProductName + ": " + IO.Path.GetFileName(replayOpenFileDialog.FileName)
-
-            mnuBtnChangeTargetMap.Enabled = True
-            mnuBtnImportReplayVersion.Enabled = True
-
-            replayControl.StartLoadingReplay(_loadedReplay, filterReplayControl.Filter())
         Catch ex As Exception When TypeOf ex Is IO.IOException OrElse
                                    TypeOf ex Is IO.InvalidDataException OrElse
                                    TypeOf ex Is PicklingException
-            MessageBox.Show("Error loading replay: {0}".Frmt(ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-            _loadedReplay = Nothing
+            _filename = Nothing
+            replayControl.dataReplay.Rows.Add("Error", "Error reading replay header: {0}".Frmt(ex))
+            Return
         End Try
+
+        'Init filter control (involves reading some starting blocks)
+        Try
+            filterReplayControl.LoadReplay(_loadedReplay)
+        Catch ex As Exception When TypeOf ex Is IO.IOException OrElse
+                                   TypeOf ex Is IO.InvalidDataException OrElse
+                                   TypeOf ex Is PicklingException
+            replayControl.dataReplay.Rows.Add("Error", "Error reading starting replay data: {0}".Frmt(ex))
+            _loadedReplay = Nothing
+            _headerReplay = Nothing
+            Return
+        End Try
+
+        'Start loading replay data
+        mnuBtnChangeTargetMap.Enabled = True
+        mnuBtnImportReplayVersion.Enabled = True
+        replayControl.StartLoadingReplay(_loadedReplay, filterReplayControl.Filter())
     End Sub
 
     Private Sub OnProgressUpdate(ByVal sender As AsyncReplayDataControl, ByVal value As Int32, ByVal max As Int32, ByVal caption As String) Handles replayControl.UpdateProgress
@@ -56,13 +83,11 @@ Public Class FrmMain
         pbrLoadingReplay.Value = Math.Min(value, max)
     End Sub
     Private Sub OnFinishedLoadingReplay(ByVal sender As AsyncReplayDataControl) Handles replayControl.FinishedLoadingReplay
+        mnuBtnSave.Enabled = True
         mnuSaveAs.Enabled = True
     End Sub
-    Private Sub OnFinishedFilteringReplay(ByVal sender As AsyncReplayDataControl) Handles replayControl.FinishedFilteringReplay
 
-    End Sub
-
-    Private Sub OnGridSelectionChanged()
+    Private Sub OnGridSelectionChanged() 'handles setup in OnFormLoad
         Dim cells = From cell In replayControl.dataReplay.SelectedCells Select DirectCast(cell, DataGridViewCell)
         Dim rows = From cell In cells
                    Select row = DirectCast(cell.OwningRow, DataGridViewRow)
@@ -76,7 +101,7 @@ Public Class FrmMain
                                           TypeOf rows.Single.Cells(replayControl.colEntry.Index).Value Is ReplayEntry
         mnuBtnDeleteSelectedEntry.Enabled = mnuBtnEditSelectedEntry.Enabled
         mnuBtnInsertEntry.Enabled = rows.CountUpTo(2) = 1 AndAlso
-                                    rows.First.Index > AsyncReplayDataControl.HeaderRowCount AndAlso
+                                    rows.First.Index >= AsyncReplayDataControl.HeaderRowCount AndAlso
                                     rows.First.Index <= replayControl.dataReplay.RowCount - AsyncReplayDataControl.HeaderRowCount
     End Sub
 
@@ -112,7 +137,6 @@ Public Class FrmMain
         Try
             _headerReplay = ReplayReader.FromFile(replayOpenFileDialog.FileName)
             replayControl.dataReplay(replayControl.colEntry.Index, 0).Value = _headerReplay.Description.Value
-            'lblReplayVersion.Text = "Replay Version: {0}".Frmt(_headerReplay.ReplayVersion)
             OnGridSelectionChanged()
         Catch ex As Exception When TypeOf ex Is IO.IOException OrElse
                                    TypeOf ex Is IO.InvalidDataException
@@ -122,6 +146,8 @@ Public Class FrmMain
 
     Private Sub OnClickChangeTargetMap() Handles mnuBtnChangeTargetMap.Click
         If mapOpenFileDialog.ShowDialog() <> DialogResult.OK Then Return
+
+        'Get current values (to be replaced)
         Dim oldValue As NamedValueMap
         Dim oldGameStats As GameStats
         Try
@@ -134,6 +160,7 @@ Public Class FrmMain
         End Try
 
         Try
+            'Search for warcraft 3 folder, upward from map folder
             Dim curFolder = IO.Directory.GetParent(mapOpenFileDialog.FileName)
             Do
                 If curFolder.Parent Is Nothing Then
@@ -145,25 +172,29 @@ Public Class FrmMain
                 End If
             Loop
 
+            'Load map info
             OnProgressUpdate(replayControl, 0, 1, "Loading Map...")
             Refresh()
             Dim map = WC3.Map.FromFile(filePath:=mapOpenFileDialog.FileName,
                                        wc3MapFolder:=curFolder.FullName,
                                        wc3PatchMPQFolder:=curFolder.Parent.FullName)
             OnProgressUpdate(replayControl, 1, 1, "")
+
+            'Get new values
             Dim newGameStats = GameStats.FromMapAndSettings(map,
-                                                                oldGameStats.RandomHero,
-                                                                oldGameStats.RandomRace,
-                                                                oldGameStats.AllowFullSharedControl,
-                                                                oldGameStats.LockTeams,
-                                                                oldGameStats.TeamsTogether,
-                                                                oldGameStats.Observers,
-                                                                oldGameStats.Visibility,
-                                                                oldGameStats.Speed,
-                                                                oldGameStats.HostName)
+                                                            oldGameStats.RandomHero,
+                                                            oldGameStats.RandomRace,
+                                                            oldGameStats.AllowFullSharedControl,
+                                                            oldGameStats.LockTeams,
+                                                            oldGameStats.TeamsTogether,
+                                                            oldGameStats.Observers,
+                                                            oldGameStats.Visibility,
+                                                            oldGameStats.Speed,
+                                                            oldGameStats.HostName)
             Dim newValue = oldValue.ToDictionary(Function(e) e.Key, Function(e) If(e.Key = "game stats", newGameStats, e.Value))
             Dim newEntry = ReplayEntry.FromValue(Replay.Format.ReplayEntryStartOfReplay, newValue)
-            'lblTargetMap.Text = newGameStats.AdvertisedPath
+
+            'Replace old values with new values
             replayControl.dataReplay(replayControl.colEntry.Index, 1).Value = newEntry
             OnGridSelectionChanged()
         Catch ex As Exception
@@ -173,6 +204,25 @@ Public Class FrmMain
 
     Private Sub OnClickSaveAs() Handles mnuSaveAs.Click
         If replaySaveFileDialog.ShowDialog(Me) <> DialogResult.OK Then Return
+        _filename = replaySaveFileDialog.FileName
+        _pristineReplayFilename = False
+        OnClickSave()
+    End Sub
+
+    Private Sub OnClickSave() Handles mnuBtnSave.Click
+        If _loadedReplay Is Nothing Then Return
+
+        'Avoid accidental saves over original replay files
+        If _pristineReplayFilename Then
+            If MessageBox.Show("Are you sure you want to save over the original replay?",
+                               "Overwrite",
+                               MessageBoxButtons.YesNo,
+                               MessageBoxIcon.Warning,
+                               MessageBoxDefaultButton.Button2) <> Windows.Forms.DialogResult.Yes Then Return
+            _pristineReplayFilename = False
+        End If
+
+        'Save replay data
         Using w = New ReplayWriter(stream:=New IO.FileStream(replaySaveFileDialog.FileName, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.None).AsRandomWritableStream,
                                    settings:=_headerReplay.Settings,
                                    wc3Version:=_headerReplay.WC3Version,
@@ -183,6 +233,7 @@ Public Class FrmMain
             Next i
         End Using
 
+        'Update loaded replay state
         _loadedReplay = ReplayReader.FromFile(replaySaveFileDialog.FileName)
         _headerReplay = _loadedReplay
         Me.Text = Application.ProductName + ": " + IO.Path.GetFileName(replaySaveFileDialog.FileName)

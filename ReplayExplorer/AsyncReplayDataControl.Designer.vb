@@ -47,11 +47,11 @@ Partial Class AsyncReplayDataControl
         'colGameTime
         '
         Me.colGameTime.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells
-        Me.colGameTime.HeaderText = "Time (ms)"
+        Me.colGameTime.HeaderText = "Time (ms) "
         Me.colGameTime.Name = "colGameTime"
         Me.colGameTime.ReadOnly = True
         Me.colGameTime.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.colGameTime.Width = 58
+        Me.colGameTime.Width = 61
         '
         'colEntry
         '

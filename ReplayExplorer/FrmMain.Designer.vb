@@ -32,6 +32,8 @@ Partial Class FrmMain
         Me.mnuBtnImportReplayVersion = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuBtnChangeTargetMap = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuBtnEditSelectedEntry = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuBtnDeleteSelectedEntry = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuBtnInsertEntry = New System.Windows.Forms.ToolStripMenuItem()
         Me.replayOpenFileDialog = New System.Windows.Forms.OpenFileDialog()
         Me.txtDesc = New System.Windows.Forms.TextBox()
         Me.lscActionTypeFilter = New System.Windows.Forms.CheckedListBox()
@@ -40,11 +42,11 @@ Partial Class FrmMain
         Me.lblProgress = New System.Windows.Forms.Label()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.mapOpenFileDialog = New System.Windows.Forms.OpenFileDialog()
-        Me.filterReplayControl = New ReplayExplorer.FilterControl()
         Me.replaySaveFileDialog = New System.Windows.Forms.SaveFileDialog()
+        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.replayControl = New ReplayExplorer.AsyncReplayDataControl()
-        Me.mnuBtnInsertEntry = New System.Windows.Forms.ToolStripMenuItem()
-        Me.mnuBtnDeleteSelectedEntry = New System.Windows.Forms.ToolStripMenuItem()
+        Me.filterReplayControl = New ReplayExplorer.FilterControl()
+        Me.mnuBtnSave = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuMain.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -59,7 +61,7 @@ Partial Class FrmMain
         '
         'mnuFile
         '
-        Me.mnuFile.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuOpen, Me.mnuSaveAs})
+        Me.mnuFile.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuOpen, Me.mnuBtnSave, Me.mnuSaveAs})
         Me.mnuFile.Name = "mnuFile"
         Me.mnuFile.Size = New System.Drawing.Size(37, 20)
         Me.mnuFile.Text = "File"
@@ -67,19 +69,22 @@ Partial Class FrmMain
         'mnuOpen
         '
         Me.mnuOpen.Name = "mnuOpen"
-        Me.mnuOpen.Size = New System.Drawing.Size(152, 22)
+        Me.mnuOpen.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.O), System.Windows.Forms.Keys)
+        Me.mnuOpen.Size = New System.Drawing.Size(198, 22)
         Me.mnuOpen.Text = "Open"
         '
         'mnuSaveAs
         '
         Me.mnuSaveAs.Enabled = False
         Me.mnuSaveAs.Name = "mnuSaveAs"
-        Me.mnuSaveAs.Size = New System.Drawing.Size(152, 22)
+        Me.mnuSaveAs.ShortcutKeys = CType(((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Shift) _
+                    Or System.Windows.Forms.Keys.S), System.Windows.Forms.Keys)
+        Me.mnuSaveAs.Size = New System.Drawing.Size(198, 22)
         Me.mnuSaveAs.Text = "Save As ..."
         '
         'EditToolStripMenuItem1
         '
-        Me.EditToolStripMenuItem1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuBtnImportReplayVersion, Me.mnuBtnChangeTargetMap, Me.mnuBtnEditSelectedEntry, Me.mnuBtnDeleteSelectedEntry, Me.mnuBtnInsertEntry})
+        Me.EditToolStripMenuItem1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuBtnImportReplayVersion, Me.mnuBtnChangeTargetMap, Me.ToolStripSeparator1, Me.mnuBtnEditSelectedEntry, Me.mnuBtnDeleteSelectedEntry, Me.mnuBtnInsertEntry})
         Me.EditToolStripMenuItem1.Name = "EditToolStripMenuItem1"
         Me.EditToolStripMenuItem1.Size = New System.Drawing.Size(39, 20)
         Me.EditToolStripMenuItem1.Text = "Edit"
@@ -87,7 +92,7 @@ Partial Class FrmMain
         'mnuBtnImportReplayVersion
         '
         Me.mnuBtnImportReplayVersion.Name = "mnuBtnImportReplayVersion"
-        Me.mnuBtnImportReplayVersion.Size = New System.Drawing.Size(241, 22)
+        Me.mnuBtnImportReplayVersion.Size = New System.Drawing.Size(290, 22)
         Me.mnuBtnImportReplayVersion.Text = "Import Replay Version"
         Me.mnuBtnImportReplayVersion.ToolTipText = "Allows you to update the replay's version, by importing it from another replay." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & _
             "(Can make old replays compatible, but the game may play out differently.)"
@@ -95,7 +100,7 @@ Partial Class FrmMain
         'mnuBtnChangeTargetMap
         '
         Me.mnuBtnChangeTargetMap.Name = "mnuBtnChangeTargetMap"
-        Me.mnuBtnChangeTargetMap.Size = New System.Drawing.Size(241, 22)
+        Me.mnuBtnChangeTargetMap.Size = New System.Drawing.Size(290, 22)
         Me.mnuBtnChangeTargetMap.Text = "Change Target Map"
         Me.mnuBtnChangeTargetMap.ToolTipText = "Allows you to select the map the replay says it applies to." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "(The new map should " & _
             "be extremely similar to the true map.)"
@@ -103,9 +108,24 @@ Partial Class FrmMain
         'mnuBtnEditSelectedEntry
         '
         Me.mnuBtnEditSelectedEntry.Name = "mnuBtnEditSelectedEntry"
-        Me.mnuBtnEditSelectedEntry.Size = New System.Drawing.Size(241, 22)
+        Me.mnuBtnEditSelectedEntry.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.E), System.Windows.Forms.Keys)
+        Me.mnuBtnEditSelectedEntry.Size = New System.Drawing.Size(290, 22)
         Me.mnuBtnEditSelectedEntry.Text = "Edit Selected Entry"
         Me.mnuBtnEditSelectedEntry.ToolTipText = "Allows you to edit the raw data making up a replay entry."
+        '
+        'mnuBtnDeleteSelectedEntry
+        '
+        Me.mnuBtnDeleteSelectedEntry.Name = "mnuBtnDeleteSelectedEntry"
+        Me.mnuBtnDeleteSelectedEntry.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Delete), System.Windows.Forms.Keys)
+        Me.mnuBtnDeleteSelectedEntry.Size = New System.Drawing.Size(290, 22)
+        Me.mnuBtnDeleteSelectedEntry.Text = "Delete Selected Entry"
+        '
+        'mnuBtnInsertEntry
+        '
+        Me.mnuBtnInsertEntry.Name = "mnuBtnInsertEntry"
+        Me.mnuBtnInsertEntry.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Insert), System.Windows.Forms.Keys)
+        Me.mnuBtnInsertEntry.Size = New System.Drawing.Size(290, 22)
+        Me.mnuBtnInsertEntry.Text = "Insert Entry At Selected Position"
         '
         'replayOpenFileDialog
         '
@@ -168,19 +188,14 @@ Partial Class FrmMain
         '
         Me.mapOpenFileDialog.Filter = "WC3 Map Files (*.w3m;*.w3x)|*.w3m;*.w3x"
         '
-        'filterReplayControl
-        '
-        Me.filterReplayControl.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.filterReplayControl.AutoScroll = True
-        Me.filterReplayControl.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.filterReplayControl.Location = New System.Drawing.Point(0, 413)
-        Me.filterReplayControl.Name = "filterReplayControl"
-        Me.filterReplayControl.Size = New System.Drawing.Size(420, 199)
-        Me.filterReplayControl.TabIndex = 23
-        '
         'replaySaveFileDialog
         '
         Me.replaySaveFileDialog.Filter = "Warcraft 3 Replays (*.w3g)|*.w3g"
+        '
+        'ToolStripSeparator1
+        '
+        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(287, 6)
         '
         'replayControl
         '
@@ -192,17 +207,22 @@ Partial Class FrmMain
         Me.replayControl.Size = New System.Drawing.Size(924, 383)
         Me.replayControl.TabIndex = 25
         '
-        'mnuBtnInsertEntry
+        'filterReplayControl
         '
-        Me.mnuBtnInsertEntry.Name = "mnuBtnInsertEntry"
-        Me.mnuBtnInsertEntry.Size = New System.Drawing.Size(241, 22)
-        Me.mnuBtnInsertEntry.Text = "Insert Entry At Selected Position"
+        Me.filterReplayControl.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.filterReplayControl.AutoScroll = True
+        Me.filterReplayControl.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.filterReplayControl.Location = New System.Drawing.Point(0, 413)
+        Me.filterReplayControl.Name = "filterReplayControl"
+        Me.filterReplayControl.Size = New System.Drawing.Size(420, 199)
+        Me.filterReplayControl.TabIndex = 23
         '
-        'mnuBtnDeleteSelectedEntry
+        'mnuBtnSave
         '
-        Me.mnuBtnDeleteSelectedEntry.Name = "mnuBtnDeleteSelectedEntry"
-        Me.mnuBtnDeleteSelectedEntry.Size = New System.Drawing.Size(241, 22)
-        Me.mnuBtnDeleteSelectedEntry.Text = "Delete Selected Entry"
+        Me.mnuBtnSave.Name = "mnuBtnSave"
+        Me.mnuBtnSave.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.S), System.Windows.Forms.Keys)
+        Me.mnuBtnSave.Size = New System.Drawing.Size(198, 22)
+        Me.mnuBtnSave.Text = "Save"
         '
         'FrmMain
         '
@@ -246,5 +266,7 @@ Partial Class FrmMain
     Friend WithEvents mnuBtnEditSelectedEntry As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents mnuBtnDeleteSelectedEntry As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents mnuBtnInsertEntry As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ToolStripSeparator1 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents mnuBtnSave As System.Windows.Forms.ToolStripMenuItem
 
 End Class
