@@ -12,6 +12,7 @@ Public Class FrmEditEntry
     Private pickle As ISimplePickle
     Private allowEvents As Boolean
     Private control As ISimpleValueEditor
+    Private throttle As New Throttle(cooldown:=100.Milliseconds, clock:=New SystemClock())
 
     Public Shared Function EditEntry(ByVal owner As IWin32Window, ByVal jar As ISimpleJar, ByVal pickle As ISimplePickle) As ISimplePickle
         Using f = New FrmEditEntry
@@ -27,6 +28,13 @@ Public Class FrmEditEntry
             Me.pickle = pickle
             txtRawData.Text = pickle.Data.ToHexString
             txtParsed.Text = pickle.Description
+
+            Me.control = jar.MakeControl()
+            control.Control.Width = Panel1.Width
+            control.Control.Anchor = AnchorStyles.Left Or AnchorStyles.Right Or AnchorStyles.Top
+            Panel1.Controls.Add(control.Control)
+            AddHandler control.ValueChanged, Sub() StructuredUpdate()
+
             RefreshStructuredView()
         Finally
             allowEvents = True
@@ -39,13 +47,13 @@ Public Class FrmEditEntry
         Next child
     End Sub
     Private Sub RefreshStructuredView()
-        Panel1.Controls.Clear()
-        Me.control = jar.MakeControl()
-        control.Value = pickle.Value
-        control.Control.Width = Panel1.Width
-        control.Control.Anchor = AnchorStyles.Left Or AnchorStyles.Right Or AnchorStyles.Top
-        Panel1.Controls.Add(control.Control)
-        AddHandler control.ValueChanged, Sub() StructuredUpdate()
+        Try
+            allowEvents = False
+            control.Control.Enabled = True
+            control.Value = pickle.Value
+        Finally
+            allowEvents = True
+        End Try
     End Sub
 
     Private Sub StructuredUpdate()
@@ -68,39 +76,58 @@ Public Class FrmEditEntry
             allowEvents = True
         End Try
     End Sub
-    Private Function TrySavePickle() As Boolean
+
+    Private Sub OnRawDataChanged() Handles txtRawData.TextChanged
+        If Not allowEvents Then Return
+
+        btnApply.Enabled = True
+        txtParsed.BackColor = SystemColors.Window
+        txtParsed.ReadOnly = False
+
         Try
             allowEvents = False
-            Dim data = (From word In txtRawData.Text.Replace(Environment.NewLine, " "c).Split(" "c)
-                        Where word <> ""
-                        Select CByte(word.FromHexToUInt64(ByteOrder.BigEndian))
-                        ).ToReadableList
-            Dim pickle = jar.ParsePickle(data)
-            Me.pickle = pickle
-            Me.txtParsed.Text = pickle.Description
+            Dim data = New DataJar().Parse(txtRawData.Text.Replace(Environment.NewLine, " "c))
+            Me.pickle = jar.ParsePickle(data)
+            txtParsed.Text = pickle.Description
             If pickle.Data.Count < data.Count Then
-                txtParsed.Text = "Warning: Data leftover [{0}]".Frmt(data.SubView(pickle.Data.Count).ToHexString) + Environment.NewLine + txtParsed.Text
+                txtParsed.Text = "Warning: Data leftover [{0}]".Frmt(data.SubView(pickle.Data.Count).ToHexString) + Environment.NewLine +
+                                 txtParsed.Text
+                txtParsed.BackColor = Color.LightYellow
             End If
-            btnRefresh.Enabled = True
-            Panel1.Controls(0).Enabled = False
-            Return True
+            control.Control.Enabled = False
+            throttle.SetActionToRun(Sub() Me.Invoke(Sub() RefreshStructuredView()))
         Catch ex As Exception
-            Me.txtParsed.Text = ex.ToString
-            Return False
+            txtParsed.Text = ex.ToString
+            txtParsed.BackColor = Color.Pink
+            txtParsed.ReadOnly = True
+            btnApply.Enabled = False
         Finally
             allowEvents = True
         End Try
-    End Function
-
-    Private Sub txtRawData_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtRawData.TextChanged
+    End Sub
+    Private Sub OnParsedTextChanged() Handles txtParsed.TextChanged
         If Not allowEvents Then Return
-        btnApply.Enabled = TrySavePickle()
+
+        btnApply.Enabled = True
+        txtRawData.ReadOnly = False
+        txtRawData.BackColor = SystemColors.Window
+
+        Try
+            allowEvents = False
+            Me.pickle = jar.PackPickle(jar.Parse(txtParsed.Text))
+            txtRawData.Text = pickle.Data.ToHexString
+            control.Control.Enabled = False
+            throttle.SetActionToRun(Sub() Me.Invoke(Sub() RefreshStructuredView()))
+        Catch ex As Exception
+            txtRawData.Text = ex.ToString
+            txtRawData.BackColor = Color.Pink
+            btnApply.Enabled = False
+            txtRawData.ReadOnly = True
+        Finally
+            allowEvents = True
+        End Try
     End Sub
 
-    Private Sub OnRefreshClick() Handles btnRefresh.Click
-        RefreshStructuredView()
-        btnRefresh.Enabled = False
-    End Sub
     Private Sub btnApply_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnApply.Click
         Me.Dispose()
     End Sub
