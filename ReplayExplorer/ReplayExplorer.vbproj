@@ -149,8 +149,17 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="AsyncReplayDataControl.Designer.vb">
+      <DependentUpon>AsyncReplayDataControl.vb</DependentUpon>
+    </Compile>
+    <Compile Include="AsyncReplayDataControl.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="AsyncReplayDataControl.resx">
+      <DependentUpon>AsyncReplayDataControl.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FilterControl.resx">
       <DependentUpon>FilterControl.vb</DependentUpon>
     </EmbeddedResource>
