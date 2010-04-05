@@ -137,6 +137,7 @@ Public Class FrmMain
         Try
             _headerReplay = ReplayReader.FromFile(replayOpenFileDialog.FileName)
             replayControl.dataReplay(replayControl.colEntry.Index, 0).Value = _headerReplay.Description.Value
+            filterReplayControl.UpdateInfo(_headerReplay.ReplayVersion)
             OnGridSelectionChanged()
         Catch ex As Exception When TypeOf ex Is IO.IOException OrElse
                                    TypeOf ex Is IO.InvalidDataException
@@ -196,6 +197,7 @@ Public Class FrmMain
 
             'Replace old values with new values
             replayControl.dataReplay(replayControl.colEntry.Index, 1).Value = newEntry
+            filterReplayControl.UpdateInfo(map.AdvertisedPath)
             OnGridSelectionChanged()
         Catch ex As Exception
             MessageBox.Show("Error loading map: {0}".Frmt(ex))

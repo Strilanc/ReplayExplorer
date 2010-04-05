@@ -33,6 +33,9 @@ Public Class FilterControl
             If players.Count > 12 Then Throw New IO.InvalidDataException("Replay has too many player entries.")
             If players.Count < 1 Then Throw New IO.InvalidDataException("Replay has no player entries.")
 
+            UpdateInfo(version:=replay.ReplayVersion)
+            UpdateInfo(targetMap:=DirectCast(replay.Entries.First.Payload, NamedValueMap).ItemAs(Of GameStats)("game stats").AdvertisedPath)
+
             lscFilterPlayers.Items.Clear()
             For Each player In players
                 lscFilterPlayers.Items.Add("{0}: {1}".Frmt(player.pid.Index, player.name), isChecked:=True)
@@ -40,6 +43,12 @@ Public Class FilterControl
         Finally
             _ignoreFilterEvents = False
         End Try
+    End Sub
+    Public Sub UpdateInfo(ByVal version As Integer)
+        lblReplayVersion.Text = "Replay Version: {0}".Frmt(version)
+    End Sub
+    Public Sub UpdateInfo(ByVal targetMap As InvariantString)
+        lblTargetMap.Text = "Target Map: {0}".Frmt(targetMap)
     End Sub
 
     Private Sub OnFilterChangeDelay() Handles lscEntryTypeFilter.ItemCheck,

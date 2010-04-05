@@ -33,11 +33,13 @@ Partial Class FilterControl
         Me.txtMinGameTime = New System.Windows.Forms.TextBox()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
+        Me.chkIgnoreGameStateChecksums = New System.Windows.Forms.CheckBox()
         Me.TabPage2 = New System.Windows.Forms.TabPage()
         Me.lscFilterPlayers = New System.Windows.Forms.CheckedListBox()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
         Me.TabPage4 = New System.Windows.Forms.TabPage()
-        Me.chkIgnoreGameStateChecksums = New System.Windows.Forms.CheckBox()
+        Me.lblReplayVersion = New System.Windows.Forms.Label()
+        Me.lblTargetMap = New System.Windows.Forms.Label()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabPage2.SuspendLayout()
@@ -91,7 +93,7 @@ Partial Class FilterControl
         Me.chkIgnoreEmptyTicks.AutoSize = True
         Me.chkIgnoreEmptyTicks.Checked = True
         Me.chkIgnoreEmptyTicks.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.chkIgnoreEmptyTicks.Location = New System.Drawing.Point(0, 82)
+        Me.chkIgnoreEmptyTicks.Location = New System.Drawing.Point(0, 80)
         Me.chkIgnoreEmptyTicks.Name = "chkIgnoreEmptyTicks"
         Me.chkIgnoreEmptyTicks.Size = New System.Drawing.Size(117, 17)
         Me.chkIgnoreEmptyTicks.TabIndex = 27
@@ -101,7 +103,7 @@ Partial Class FilterControl
         'lblMaxGameTime
         '
         Me.lblMaxGameTime.AutoSize = True
-        Me.lblMaxGameTime.Location = New System.Drawing.Point(-3, 40)
+        Me.lblMaxGameTime.Location = New System.Drawing.Point(115, 38)
         Me.lblMaxGameTime.Name = "lblMaxGameTime"
         Me.lblMaxGameTime.Size = New System.Drawing.Size(84, 13)
         Me.lblMaxGameTime.TabIndex = 24
@@ -110,7 +112,8 @@ Partial Class FilterControl
         'lblMinGameTime
         '
         Me.lblMinGameTime.AutoSize = True
-        Me.lblMinGameTime.Location = New System.Drawing.Point(-3, 0)
+        Me.lblMinGameTime.Location = New System.Drawing.Point(-3, 38)
+        Me.lblMinGameTime.Margin = New System.Windows.Forms.Padding(3, 3, 3, 0)
         Me.lblMinGameTime.Name = "lblMinGameTime"
         Me.lblMinGameTime.Size = New System.Drawing.Size(81, 13)
         Me.lblMinGameTime.TabIndex = 23
@@ -118,14 +121,14 @@ Partial Class FilterControl
         '
         'txtMaxGameTime
         '
-        Me.txtMaxGameTime.Location = New System.Drawing.Point(-3, 56)
+        Me.txtMaxGameTime.Location = New System.Drawing.Point(118, 54)
         Me.txtMaxGameTime.Name = "txtMaxGameTime"
         Me.txtMaxGameTime.Size = New System.Drawing.Size(112, 20)
         Me.txtMaxGameTime.TabIndex = 22
         '
         'txtMinGameTime
         '
-        Me.txtMinGameTime.Location = New System.Drawing.Point(-3, 16)
+        Me.txtMinGameTime.Location = New System.Drawing.Point(0, 54)
         Me.txtMinGameTime.Name = "txtMinGameTime"
         Me.txtMinGameTime.Size = New System.Drawing.Size(112, 20)
         Me.txtMinGameTime.TabIndex = 21
@@ -145,6 +148,8 @@ Partial Class FilterControl
         '
         'TabPage1
         '
+        Me.TabPage1.Controls.Add(Me.lblTargetMap)
+        Me.TabPage1.Controls.Add(Me.lblReplayVersion)
         Me.TabPage1.Controls.Add(Me.chkIgnoreGameStateChecksums)
         Me.TabPage1.Controls.Add(Me.lblMinGameTime)
         Me.TabPage1.Controls.Add(Me.txtMinGameTime)
@@ -156,8 +161,20 @@ Partial Class FilterControl
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
         Me.TabPage1.Size = New System.Drawing.Size(532, 145)
         Me.TabPage1.TabIndex = 0
-        Me.TabPage1.Text = "General Filters"
+        Me.TabPage1.Text = "General"
         Me.TabPage1.UseVisualStyleBackColor = True
+        '
+        'chkIgnoreGameStateChecksums
+        '
+        Me.chkIgnoreGameStateChecksums.AutoSize = True
+        Me.chkIgnoreGameStateChecksums.Checked = True
+        Me.chkIgnoreGameStateChecksums.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.chkIgnoreGameStateChecksums.Location = New System.Drawing.Point(0, 103)
+        Me.chkIgnoreGameStateChecksums.Name = "chkIgnoreGameStateChecksums"
+        Me.chkIgnoreGameStateChecksums.Size = New System.Drawing.Size(173, 17)
+        Me.chkIgnoreGameStateChecksums.TabIndex = 28
+        Me.chkIgnoreGameStateChecksums.Text = "Ignore Game State Checksums"
+        Me.chkIgnoreGameStateChecksums.UseVisualStyleBackColor = True
         '
         'TabPage2
         '
@@ -203,17 +220,27 @@ Partial Class FilterControl
         Me.TabPage4.Text = "Action Types"
         Me.TabPage4.UseVisualStyleBackColor = True
         '
-        'chkIgnoreGameStateChecksums
+        'lblReplayVersion
         '
-        Me.chkIgnoreGameStateChecksums.AutoSize = True
-        Me.chkIgnoreGameStateChecksums.Checked = True
-        Me.chkIgnoreGameStateChecksums.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.chkIgnoreGameStateChecksums.Location = New System.Drawing.Point(0, 105)
-        Me.chkIgnoreGameStateChecksums.Name = "chkIgnoreGameStateChecksums"
-        Me.chkIgnoreGameStateChecksums.Size = New System.Drawing.Size(173, 17)
-        Me.chkIgnoreGameStateChecksums.TabIndex = 28
-        Me.chkIgnoreGameStateChecksums.Text = "Ignore Game State Checksums"
-        Me.chkIgnoreGameStateChecksums.UseVisualStyleBackColor = True
+        Me.lblReplayVersion.AutoSize = True
+        Me.lblReplayVersion.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblReplayVersion.Location = New System.Drawing.Point(-3, 0)
+        Me.lblReplayVersion.Margin = New System.Windows.Forms.Padding(3)
+        Me.lblReplayVersion.Name = "lblReplayVersion"
+        Me.lblReplayVersion.Size = New System.Drawing.Size(104, 13)
+        Me.lblReplayVersion.TabIndex = 29
+        Me.lblReplayVersion.Text = "Replay Version: -"
+        '
+        'lblTargetMap
+        '
+        Me.lblTargetMap.AutoSize = True
+        Me.lblTargetMap.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblTargetMap.Location = New System.Drawing.Point(-3, 19)
+        Me.lblTargetMap.Margin = New System.Windows.Forms.Padding(3)
+        Me.lblTargetMap.Name = "lblTargetMap"
+        Me.lblTargetMap.Size = New System.Drawing.Size(84, 13)
+        Me.lblTargetMap.TabIndex = 30
+        Me.lblTargetMap.Text = "Target Map: -"
         '
         'FilterControl
         '
@@ -249,5 +276,7 @@ Partial Class FilterControl
     Friend WithEvents TabPage3 As System.Windows.Forms.TabPage
     Friend WithEvents TabPage4 As System.Windows.Forms.TabPage
     Friend WithEvents chkIgnoreGameStateChecksums As System.Windows.Forms.CheckBox
+    Friend WithEvents lblTargetMap As System.Windows.Forms.Label
+    Friend WithEvents lblReplayVersion As System.Windows.Forms.Label
 
 End Class
