@@ -160,7 +160,7 @@ Public Class AsyncReplayDataControl
             Dim checkTimeout = 0
             For Each entry In replayReader.Entries
                 If fileWorkId <> _currentFileWorkId Then Return 'another operation was started
-                If entry.Id = ReplayEntryId.Tick Then
+                If entry.Definition Is Format.ReplayEntryTick Then
                     Dim vals = DirectCast(entry.Payload, NamedValueMap)
                     gameTime += vals.ItemAs(Of UInt16)("time span")
                 End If
