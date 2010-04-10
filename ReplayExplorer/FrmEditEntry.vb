@@ -26,7 +26,7 @@ Public Class FrmEditEntry
             allowEvents = False
             Me.jar = jar
             Me.pickle = pickle
-            txtRawData.Text = pickle.Data.ToHexString
+            UpdateRawData(pickle.Data)
             txtParsed.Text = pickle.Description
 
             Me.control = jar.MakeControl()
@@ -63,7 +63,7 @@ Public Class FrmEditEntry
             Dim pickle = jar.PackPickle(control.Value)
             Me.pickle = pickle
             Me.txtParsed.Text = pickle.Description
-            Me.txtRawData.Text = pickle.Data.ToHexString
+            UpdateRawData(pickle.Data)
             txtRawData.Enabled = True
             txtParsed.BackColor = SystemColors.Window
             btnApply.Enabled = True
@@ -75,6 +75,29 @@ Public Class FrmEditEntry
         Finally
             allowEvents = True
         End Try
+    End Sub
+
+    Private Function Linefy(ByVal tree As Tree(Of JarSegment)) As String
+        If tree.Children.None Then
+            Return tree.Value.Data.ToHexString
+        Else
+            Dim lines = New List(Of String)
+            For Each child In tree.Children
+                lines.Add(Linefy(child))
+            Next child
+            If tree.Children.Count = 1 Then
+                Return lines.Single
+            ElseIf (From child In tree.Children Where child.Value.Data.Count <> 1).None Then
+                Return lines.StringJoin(" ")
+            ElseIf tree.Children.Count = 2 Then
+                Return lines.First + Environment.NewLine + lines.Skip(1).StringJoin(Environment.NewLine).Indent("  ")
+            Else
+                Return lines.StringJoin(Environment.NewLine).Indent("  ")
+            End If
+        End If
+    End Function
+    Private Sub UpdateRawData(ByVal data As IReadableList(Of Byte))
+        txtRawData.Text = Linefy(jar.RecursiveSegment(data))
     End Sub
 
     Private Sub OnRawDataChanged() Handles txtRawData.TextChanged
@@ -115,7 +138,7 @@ Public Class FrmEditEntry
         Try
             allowEvents = False
             Me.pickle = jar.PackPickle(jar.Parse(txtParsed.Text))
-            txtRawData.Text = pickle.Data.ToHexString
+            UpdateRawData(pickle.Data)
             control.Control.Enabled = False
             throttle.SetActionToRun(Sub() Me.Invoke(Sub() RefreshStructuredView()))
         Catch ex As Exception
