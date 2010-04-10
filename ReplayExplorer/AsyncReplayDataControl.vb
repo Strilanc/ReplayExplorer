@@ -58,6 +58,16 @@ Public Class AsyncReplayDataControl
         ProgressiveFilterRows(_currentFilterWorkId, filter, 0)
     End Sub
 
+    Public Sub DeleteEntryAt(ByVal index As Int32)
+        dataReplay.Rows.RemoveAt(index)
+        _rows.RemoveAt(index)
+    End Sub
+    Public Sub InsertEntryAt(ByVal index As Int32, ByVal time As UInt32, ByVal entry As ReplayEntry)
+        Contract.Requires(entry IsNot Nothing)
+        dataReplay.Rows.Insert(index, time, entry)
+        _rows.Insert(index, dataReplay.Rows(index))
+    End Sub
+
     Private Sub ProgressiveFilterRows(ByVal filterWorkId As ModByte,
                                       ByVal filter As Func(Of UInt32, ReplayEntry, Boolean),
                                       ByVal nextRow As Int32)
@@ -122,11 +132,10 @@ Public Class AsyncReplayDataControl
                     Sub() Me.BeginInvoke(Sub() ProgressiveAddReplayEntries(fileWorkId, queue, parseProgress, maxParseProgress, lastCall)))
             Else
                 'Copy rows
-                Dim rows(0 To dataReplay.RowCount - 1) As DataGridViewRow
+                _rows = New List(Of DataGridViewRow)
                 For i = 0 To dataReplay.RowCount - 1
-                    rows(i) = dataReplay.Rows(i)
+                    _rows.Add(dataReplay.Rows(i))
                 Next i
-                _rows = rows
 
                 'Done loading
                 _loadingReplay = False
