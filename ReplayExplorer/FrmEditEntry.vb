@@ -6,6 +6,7 @@ Imports Strilbrary.Threading
 Imports Strilbrary.Collections
 Imports Tinker.WC3.Replay
 Imports Tinker.WC3
+Imports System.Diagnostics.Contracts
 
 Public Class FrmEditEntry
     Private jar As ISimpleJar
@@ -15,6 +16,8 @@ Public Class FrmEditEntry
     Private throttle As New Throttle(cooldown:=100.Milliseconds, clock:=New SystemClock())
 
     Public Shared Function EditEntry(ByVal owner As IWin32Window, ByVal jar As ISimpleJar, ByVal pickle As ISimplePickle) As ISimplePickle
+        Contract.Requires(jar IsNot Nothing)
+        Contract.Requires(pickle IsNot Nothing)
         Using f = New FrmEditEntry
             f.LoadPickle(jar, pickle)
             f.ShowDialog(owner)
@@ -22,6 +25,8 @@ Public Class FrmEditEntry
         End Using
     End Function
     Public Sub LoadPickle(ByVal jar As ISimpleJar, ByVal pickle As ISimplePickle)
+        Contract.Requires(jar IsNot Nothing)
+        Contract.Requires(pickle IsNot Nothing)
         Try
             allowEvents = False
             Me.jar = jar
@@ -78,6 +83,7 @@ Public Class FrmEditEntry
     End Sub
 
     Private Sub UpdateRawData(ByVal data As IReadableList(Of Byte))
+        Contract.Requires(data IsNot Nothing)
         txtRawData.Text = data.ToHexString
     End Sub
 

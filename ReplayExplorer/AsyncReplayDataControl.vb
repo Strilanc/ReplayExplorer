@@ -59,10 +59,12 @@ Public Class AsyncReplayDataControl
     End Sub
 
     Public Sub DeleteEntryAt(ByVal index As Int32)
+        Contract.Requires(index >= 0)
         dataReplay.Rows.RemoveAt(index)
         _rows.RemoveAt(index)
     End Sub
     Public Sub InsertEntryAt(ByVal index As Int32, ByVal time As UInt32, ByVal entry As ReplayEntry)
+        Contract.Requires(index >= 0)
         Contract.Requires(entry IsNot Nothing)
         dataReplay.Rows.Insert(index, time, entry)
         _rows.Insert(index, dataReplay.Rows(index))

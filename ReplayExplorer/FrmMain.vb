@@ -7,6 +7,7 @@ Imports Strilbrary.Streams
 Imports Tinker.WC3
 Imports Tinker.WC3.Replay
 Imports Tinker.Pickling
+Imports System.Diagnostics.Contracts
 
 Public Class FrmMain
     Private _loadedReplay As ReplayReader
