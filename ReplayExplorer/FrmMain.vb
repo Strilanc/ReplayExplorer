@@ -7,6 +7,7 @@ Imports Strilbrary.Streams
 Imports Tinker.WC3
 Imports Tinker.WC3.Replay
 Imports Tinker.Pickling
+Imports System.Diagnostics.Contracts
 
 Public Class FrmMain
     Private _loadedReplay As ReplayReader
@@ -124,12 +125,13 @@ Public Class FrmMain
     Private Sub OnClickInsertEntry() Handles mnuBtnInsertEntry.Click
         Dim cell = Me.replayControl.dataReplay.SelectedCells(0)
         Dim row = Me.replayControl.dataReplay.Rows(cell.RowIndex)
-        replayControl.dataReplay.Rows.Insert(row.Index, row.Cells(0).Value, ReplayEntry.FromValue(Replay.Format.ReplayEntryGameStarted, 1UI))
+        replayControl.InsertEntryAt(row.Index,
+                                    CUInt(row.Cells(0).Value),
+                                    ReplayEntry.FromDefinitionAndValue(Format.ReplayEntryGameStarted, 1UI))
     End Sub
     Private Sub OnClickDeleteEntry() Handles mnuBtnDeleteSelectedEntry.Click
         Dim cell = Me.replayControl.dataReplay.SelectedCells(0)
-        Dim row = Me.replayControl.dataReplay.Rows(cell.RowIndex)
-        replayControl.dataReplay.Rows.RemoveAt(row.Index)
+        replayControl.DeleteEntryAt(cell.RowIndex)
     End Sub
 
     Private Sub OnClickImportReplayVersion() Handles mnuBtnImportReplayVersion.Click
@@ -193,7 +195,7 @@ Public Class FrmMain
                                                             oldGameStats.Speed,
                                                             oldGameStats.HostName)
             Dim newValue = oldValue.ToDictionary(Function(e) e.Key, Function(e) If(e.Key = "game stats", newGameStats, e.Value))
-            Dim newEntry = ReplayEntry.FromValue(Replay.Format.ReplayEntryStartOfReplay, newValue)
+            Dim newEntry = ReplayEntry.FromDefinitionAndValue(Format.ReplayEntryStartOfReplay, newValue)
 
             'Replace old values with new values
             replayControl.dataReplay(replayControl.colEntry.Index, 1).Value = newEntry
