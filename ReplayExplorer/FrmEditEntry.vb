@@ -77,27 +77,8 @@ Public Class FrmEditEntry
         End Try
     End Sub
 
-    Private Function Linefy(ByVal tree As Tree(Of JarSegment)) As String
-        If tree.Children.None Then
-            Return tree.Value.Data.ToHexString
-        Else
-            Dim lines = New List(Of String)
-            For Each child In tree.Children
-                lines.Add(Linefy(child))
-            Next child
-            If tree.Children.Count = 1 Then
-                Return lines.Single
-            ElseIf (From child In tree.Children Where child.Value.Data.Count <> 1).None Then
-                Return lines.StringJoin(" ")
-            ElseIf tree.Children.Count = 2 Then
-                Return lines.First + Environment.NewLine + lines.Skip(1).StringJoin(Environment.NewLine).Indent("  ")
-            Else
-                Return lines.StringJoin(Environment.NewLine).Indent("  ")
-            End If
-        End If
-    End Function
     Private Sub UpdateRawData(ByVal data As IReadableList(Of Byte))
-        txtRawData.Text = Linefy(jar.RecursiveSegment(data))
+        txtRawData.Text = data.ToHexString
     End Sub
 
     Private Sub OnRawDataChanged() Handles txtRawData.TextChanged
